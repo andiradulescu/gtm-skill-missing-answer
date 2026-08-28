@@ -190,6 +190,7 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
   const rawAuthors = new Set();
   const seenAuthors = new Set();
   let duplicateAuthorPostsExcluded = 0;
+  let unverifiableAuthorPostsExcluded = 0;
   const questions = [];
   for (const post of reddit) {
     if (textField(post, ['dataType', 'type']).toLowerCase() !== 'post') continue;
@@ -203,6 +204,10 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
     const key = question.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
     if (!question || seen.has(key)) continue;
     const rawAuthor = textField(post, ['username', 'userId', 'author', 'authorName']);
+    if (!rawAuthor) {
+      unverifiableAuthorPostsExcluded += 1;
+      continue;
+    }
     if (rawAuthor && seenAuthors.has(rawAuthor)) {
       duplicateAuthorPostsExcluded += 1;
       continue;
@@ -246,6 +251,7 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
       distinct_authors_verified_at_collection: rawAuthors.size >= 2,
       accepted_posts_with_author: rawAuthors.size,
       duplicate_author_posts_excluded: duplicateAuthorPostsExcluded,
+      unverifiable_author_posts_excluded: unverifiableAuthorPostsExcluded,
     },
     questions,
   };
