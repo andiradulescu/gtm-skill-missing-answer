@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proposed Figma clarification | Local draft</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #171717;
+      --muted: #666;
+      --paper: #fff;
+      --canvas: #f3f0ea;
+      --accent: #7259ff;
+      --accent-soft: #eeeaff;
+      --line: #d9d5ce;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .draft-banner {
+      padding: 12px 24px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      text-align: center;
+    }
+
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 48px auto;
+    }
+
+    .context, .note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .preview {
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgb(23 23 23 / 8%);
+    }
+
+    .existing-context { padding: clamp(32px, 7vw, 72px); }
+
+    .section-label {
+      margin: 0;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 18px 0 0;
+      font-size: clamp(36px, 6vw, 68px);
+      line-height: .98;
+      letter-spacing: -.045em;
+    }
+
+    .proposed-insertion {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      padding: 32px clamp(32px, 7vw, 72px) 40px;
+      background: var(--accent-soft);
+      border-top: 1px solid #d8d0ff;
+    }
+
+    .change-label {
+      align-self: start;
+      width: fit-content;
+      padding: 7px 10px;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .draft-copy {
+      margin: 0;
+      max-width: 650px;
+      font-size: clamp(20px, 3vw, 28px);
+      line-height: 1.35;
+      letter-spacing: -.015em;
+    }
+
+    .note { margin: 16px 0 0; }
+
+    @media (max-width: 680px) {
+      main { margin: 24px auto; }
+      .proposed-insertion { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="draft-banner">PROPOSED LOCAL DRAFT · REVIEW ONLY · NOT A LIVE-SITE CHANGE</div>
+  <main>
+    <p class="context">Focused insertion preview for the Figma for Agencies client-feedback section.</p>
+    <article class="preview">
+      <section class="existing-context">
+        <p class="section-label">Existing page context</p>
+        <h1>Invite clients into Figma to collaborate and comment on the work.</h1>
+      </section>
+      <section class="proposed-insertion">
+        <span class="change-label">Proposed copy</span>
+        <p class="draft-copy">Clients can comment on shared prototypes when they are signed in to Figma and have at least view access to the file.</p>
+      </section>
+    </article>
+    <p class="note">Evidence and limitations are recorded in the sibling Markdown finding. This file was generated for local review only.</p>
+  </main>
+</body>
+</html>

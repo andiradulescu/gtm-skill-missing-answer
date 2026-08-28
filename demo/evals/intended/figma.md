@@ -70,7 +70,8 @@ will add anonymous commenting later.
 
 ## Requested artifact
 
-Write one finding to `demo/evals/intended/figma-missing-answer.md`. The
-proposed change should target the client-feedback section of
-<https://www.figma.com/agencies/>. Do not create a preview or modify the live
-site.
+Write one finding to `demo/evals/intended/figma-missing-answer.md` and a local
+sibling preview to `demo/evals/intended/figma-missing-answer.html`. The proposed
+change should target the client-feedback section of
+<https://www.figma.com/agencies/>. Mark the preview as a review-only local draft.
+Do not modify the live site.
