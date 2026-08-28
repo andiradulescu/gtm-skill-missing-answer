@@ -6,14 +6,15 @@
 
 This is a dated, cached input for the Planable demo. It is not a live crawl. The
 linked JSON records two independently authored Reddit posts whose authors were
-verified during collection and then redacted. The two posts ask different broad
-questions, so their presence alone does not establish a repeated two-person
-question cluster.
+verified during collection and then redacted. A targeted G2 pass added one
+separately authored question below. All three questions differ semantically, so
+their presence does not establish a repeated two-person question cluster.
 
 ## Evidence contract
 
-- Use the linked JSON only for public-question evidence. Preserve its source
-  URLs, timestamps, redaction, and independence limits.
+- Use the linked JSON and the supplemental G2 record below only for
+  public-question evidence. Preserve their source URLs, timestamps, redaction,
+  and independence limits.
 - Use only the first-party pages below for Planable feature and answer evidence.
 - Treat each excerpt as evidence for exactly what it says, not for adjacent
   capabilities or workflows.
@@ -22,6 +23,28 @@ question cluster.
 - When first-party pages use overlapping or conflicting language, report the
   conflict as an unresolved limitation unless another cited page resolves it.
 - Do not describe this snapshot as current beyond its retrieval date.
+
+## Supplemental G2 question
+
+Source: <https://www.g2.com/discussions/when-we-will-have-the-stories-more-interactive>
+
+- Source date: 2022-04-28
+- Retrieved: 2026-08-28
+- Platform: G2 Discussions
+- Independence: one distinct third-party author was verified during collection;
+  identity details were omitted
+- Relationship evidence: the product-specific discussion requests additional
+  Instagram Story behavior in Planable, but does not prove account or paid-plan
+  status
+
+Verbatim question:
+
+> When we will have the stories more interactive?
+
+Non-personal context: the asker wants Story support for hashtags and links.
+Nine other G2 discussion URLs found during discovery could not be fetched from
+their canonical pages, so their indexed titles were rejected. This single G2
+question cannot establish a repeated semantic cluster.
 
 ## Pricing and the per-workspace model
 
@@ -188,8 +211,8 @@ for a recipient who has never had a Planable account remains unknown.
 
 ## Snapshot limitations
 
-- The question snapshot contains two distinct questions, not a demonstrated
-  repeated cluster by itself.
+- The question evidence contains three distinct questions across Reddit and G2,
+  not a demonstrated repeated cluster.
 - The first-party pages were inspected as public web pages on 2026-08-28. Their
   content, prices, and product behavior may change.
 - No authenticated Planable workspace, billing checkout, approver invitation,
