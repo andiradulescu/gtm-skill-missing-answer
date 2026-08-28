@@ -6,13 +6,13 @@
   },
   "track": "ai-search-optimization",
   "problem": "A B2B SaaS content lead cannot reliably identify which repeated public buying or adoption question the company website fails to answer; Missing Answer produces one review-only website-change package backed by independent public questions and an answer verified from official sources.",
-  "entry_skill": ".agents/skills/TODO-skill-name/SKILL.md",
+  "entry_skill": ".agents/skills/missing-answer/SKILL.md",
   "skills": [
-    { "path": ".agents/skills/TODO-skill-name/SKILL.md", "role": "TODO the one job this skill owns" }
+    { "path": ".agents/skills/missing-answer/SKILL.md", "role": "Find the strongest supported missing website answer and produce one sourced, review-only page-change package or an explicit insufficient-evidence result." }
   ],
   "seed_prompt": "demo/seed-prompt.md",
-  "input": "demo/input/TODO-file",
-  "output": "demo/output/TODO-file",
+  "input": "demo/input/planable.md",
+  "output": "demo/output/planable-missing-answer.md",
   "evals": "demo/evals.md",
   "run_sheet": "DEMO.md"
 }
