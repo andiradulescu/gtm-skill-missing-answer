@@ -83,9 +83,10 @@ amount, taxes, or future pricing.
 
 ## Analytics, reporting, and social inbox
 
-Source: <https://planable.io/pricing/>
+Sources:
 
-Retrieved: 2026-08-28
+- <https://planable.io/pricing/> — retrieved 2026-08-28
+- <https://planable.io/guides/analytics-features/> — retrieved 2026-08-28
 
 Verified excerpts:
 
@@ -97,11 +98,20 @@ Verified excerpts:
 
 > Includes a unified inbox for comments and DMs across all connected pages, with AI-suggested replies and sentiment filtering.
 
+> Planable Analytics is a paid add-on billed separately from your Planable subscription.
+
+> Yes. Cross-channel reports support Instagram, Facebook, LinkedIn, TikTok, and YouTube. Google Business Profile is available in single-channel reports.
+
 The page says both add-ons are available on paid plans, are enabled per
 workspace, and include a 30-day trial. It also displays lower add-on prices in
 the yearly plan cards. The snapshot therefore supports the presence and stated
-scope of the add-ons, but not whether every connected network supports every
-metric, comment, DM, reply action, or report field.
+scope of the add-ons. The Analytics guide supplies a material coverage boundary
+that the compact pricing copy does not: five named networks support
+cross-channel reports, while Google Business Profile is single-channel. These
+pages do not establish whether the add-on is subjectively worth its price for a
+particular buyer, whether every connected network supports every metric, or
+whether a buyer will need another analytics tool for unsupported networks or
+requirements.
 
 ## Instagram Stories: direct publishing and native handoff
 
