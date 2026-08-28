@@ -86,13 +86,13 @@ Missing Answer recommends one small edit but does not publish content, contact
 anyone, or modify the live website. After a positive finding it autonomously
 shows the original customer-facing section and a temporary `Original → Fixed`
 preview. It uses the rendered page when that is safely available and otherwise
-opens a credential-free local HTML fallback. A preview is never treated as
+produces a credential-free local HTML fallback. A preview is never treated as
 evidence or a deployed change.
 
 ## Current demo
 
 ```text
-$missing-answer [https://www.figma.com/](https://www.figma.com/)
+$missing-answer https://www.figma.com/
 ```
 
 That URL is the complete user input. The skill recognizes Figma internally,
@@ -114,7 +114,7 @@ fallback when a safe rendered-page preview is unavailable. It shows
 `Original → Fixed`, identifies itself as a review-only draft, and makes no
 network requests or live-site changes.
 
-The complete presentation contract and observed run provenance are recorded in
+The presentation contract and recorded evaluations are in
 [`DEMO.md`](DEMO.md) and [`demo/evals.md`](demo/evals.md).
 
 ## Abstention evidence
@@ -123,9 +123,7 @@ The skill instructions accept one public company URL and define the same
 evidence and abstention rules for another company:
 
 ```text
-$missing-answer Analyze https://example.com and write the strongest supported
-finding to missing-answer.md. Stop with insufficient evidence if the complete
-evidence chain cannot be verified.
+$missing-answer https://example.com/
 ```
 
 The Planable case remains as the negative evaluation. Its dated corpus contains
@@ -165,8 +163,8 @@ node --test scripts/*.test.mjs
 | [`.agents/skills/missing-answer/SKILL.md`](.agents/skills/missing-answer/SKILL.md) | The reusable Codex skill and its evidence contract |
 | [`demo/input/`](demo/input/) | Representative input and dated public-data snapshot |
 | [`demo/output/`](demo/output/) | Figma finding and review-only local preview fallback |
-| [`demo/seed-prompt.md`](demo/seed-prompt.md) | Exact cold-start prompt verified from a clean clone |
-| [`demo/evals.md`](demo/evals.md) | Three observed eval cases plus exact-seed provenance |
+| [`demo/seed-prompt.md`](demo/seed-prompt.md) | One-line cold-start prompt for the Figma URL route |
+| [`demo/evals.md`](demo/evals.md) | Recorded intended, abstention, and safety evaluations |
 | [`DEMO.md`](DEMO.md) | Completed two-minute presentation run sheet |
 | [`scripts/collect-public-questions.mjs`](scripts/collect-public-questions.mjs) | Bounded public-question collection and privacy reduction |
 | [`scripts/validate-question-snapshot.mjs`](scripts/validate-question-snapshot.mjs) | Deterministic snapshot evidence gate |
