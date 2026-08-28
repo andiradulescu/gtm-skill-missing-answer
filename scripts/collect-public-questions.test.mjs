@@ -141,7 +141,7 @@ test('redacts Reddit attribution and excludes crossposts from the same author', 
   assert.equal(result.status, 0, result.stderr);
   const collected = JSON.parse(await readFile(output, 'utf8'));
   assert.equal(collected.questions.length, 1);
-  assert.equal(collected.questions[0].excerpt, 'Anyone know a cheaper option? & why? submitted by [redacted-author]');
+  assert.equal(collected.questions[0].excerpt, 'Anyone know a cheaper option? & why?');
   assert.equal(collected.questions[0].author_available, true);
   assert.equal(collected.independence_check.duplicate_author_posts_excluded, 1);
   assert.ok(!JSON.stringify(collected).includes('real_person'));
