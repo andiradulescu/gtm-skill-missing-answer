@@ -250,7 +250,7 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
       validation: { id: REDDIT_ACTOR, endpoint: actorEndpoint(REDDIT_ACTOR), max_source_urls: 10, comments: false },
     },
     queries: mode === 'live-apify' ? liveQueries : fixtureQueries,
-    discovered_sources: candidates,
+    discovery_summary: { canonical_reddit_urls_found: candidates.length },
     independence_check: {
       distinct_authors_verified_at_collection: rawAuthors.size >= 2,
       accepted_posts_with_author: rawAuthors.size,
