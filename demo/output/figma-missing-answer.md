@@ -2,7 +2,7 @@
 
 ## “Can clients comment on a prototype without creating a Figma account?”
 
-**2 independent users or prospects asked this.**
+**2 independent people asked this.**
 
 ### Source 1, evaluator
 
@@ -38,8 +38,7 @@ comment on a prototype.
 
 ## Best place to fix
 
-**Figma for Agencies → “Build better client partnerships” → client feedback
-section.**
+**Figma for Agencies → client feedback section.**
 
 ## Proposed copy
 
