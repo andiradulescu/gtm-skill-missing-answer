@@ -28,8 +28,8 @@ whether to ship.
 
 ## What the skill delivers
 
-For one public company website, `$missing-answer` produces exactly one strongest
-finding:
+For one public company website, `$missing-answer` first applies a qualifying
+evidence gate. A successful case produces exactly one strongest finding:
 
 1. **Potential customers are asking this**: the normalized question, the
    independent source count, and short redacted excerpts with URLs and retrieval
@@ -81,26 +81,27 @@ evidence are never converted into product claims.
 Missing Answer recommends one small edit and can create a local HTML preview. It
 does not publish content, contact anyone, or modify the live website.
 
-## Demo
+## Current demo
 
-The representative demo analyzes Planable from a committed, dated evidence
-snapshot. This keeps the demo path reproducible and free of credentials while
-preserving the original source URLs and retrieval dates. The snapshot is always
-described as cached evidence, never as a live crawl.
+The committed Planable case uses a dated evidence snapshot. This keeps the
+analysis reproducible and preserves the original source URLs and retrieval
+dates. The snapshot is always described as cached evidence, never as a live
+crawl.
 
-From the repository root in Codex, paste the contents of
-[`demo/seed-prompt.md`](demo/seed-prompt.md). The prompt invokes
-`$missing-answer`, names the representative input, and requests the Markdown
-finding plus its sibling local HTML preview.
+The current snapshot contains three independently authored questions, but they
+concern different topics. The saved result therefore stops at
+[`insufficient evidence`](demo/output/planable-missing-answer.md) before website
+gap analysis, answer verification, a proposed page change, or an HTML preview.
+That is the correct result for the available evidence.
 
-If the live run stalls, the genuine saved result under
-[`demo/output/`](demo/output/) is the fallback. The presentation sequence and
-the three observed evaluation cases are recorded in [`DEMO.md`](DEMO.md) and
-[`demo/evals.md`](demo/evals.md).
+The final seed prompt, presentation run sheet, and three-case evaluation record
+are not yet complete. The saved abstention is evidence of the current prepared
+case, not proof of a fresh run from the final submitted seed prompt.
 
-## Using it on another company
+## Portability contract
 
-Give the skill exactly one public company URL and a destination for the result:
+The skill instructions accept one public company URL and define the same
+evidence and abstention rules for another company:
 
 ```text
 $missing-answer Analyze https://example.com and write the strongest supported
@@ -108,9 +109,11 @@ finding to missing-answer.md. Stop with insufficient evidence if the complete
 evidence chain cannot be verified.
 ```
 
-For companies other than the committed demo target, the run depends on public
-pages being accessible at the time of analysis. No login-only sources, personal
-data, or authenticated services are required by the skill.
+This is the intended reusable contract, not demonstrated end-to-end portability.
+The repository does not yet record a successful second-company skill run. The
+`stock.estate` fixture exercises collector normalization only; it does not prove
+that question clustering, website-gap analysis, official answer verification,
+or preview generation works unchanged on a second domain.
 
 ## Evidence collection
 
@@ -124,10 +127,15 @@ The collector can run against fixtures without credentials. Live collection
 uses Apify and requires `APIFY_TOKEN`; it is not part of the credential-free
 demo path.
 
-Run its tests with:
+[`scripts/validate-question-snapshot.mjs`](scripts/validate-question-snapshot.mjs)
+checks the committed snapshot schema, timestamps, fetched-source status,
+distinct source URLs, author verification and redaction, subject-domain
+exclusion, and privacy-sensitive fields before the model uses the evidence.
+
+Run the collector and snapshot-validator tests with:
 
 ```sh
-node --test scripts/collect-public-questions.test.mjs
+node --test scripts/*.test.mjs
 ```
 
 ## Repository map
@@ -136,11 +144,12 @@ node --test scripts/collect-public-questions.test.mjs
 | --- | --- |
 | [`.agents/skills/missing-answer/SKILL.md`](.agents/skills/missing-answer/SKILL.md) | The reusable Codex skill and its evidence contract |
 | [`demo/input/`](demo/input/) | Representative input and dated public-data snapshot |
-| [`demo/output/`](demo/output/) | Genuine fallback result and local preview |
-| [`demo/seed-prompt.md`](demo/seed-prompt.md) | Exact cold-start prompt for the demo |
-| [`demo/evals.md`](demo/evals.md) | Intended, insufficient-evidence, and safety evaluations |
-| [`DEMO.md`](DEMO.md) | Two-minute presentation run sheet |
+| [`demo/output/`](demo/output/) | Current saved result, presently an abstention with no preview |
+| [`demo/seed-prompt.md`](demo/seed-prompt.md) | Cold-start prompt template, not yet finalized |
+| [`demo/evals.md`](demo/evals.md) | Three-case evaluation template, not yet executed |
+| [`DEMO.md`](DEMO.md) | Presentation run sheet template, not yet finalized |
 | [`scripts/collect-public-questions.mjs`](scripts/collect-public-questions.mjs) | Bounded public-question collection and privacy reduction |
+| [`scripts/validate-question-snapshot.mjs`](scripts/validate-question-snapshot.mjs) | Deterministic snapshot evidence gate |
 
 ## Boundaries and limitations
 
@@ -151,6 +160,7 @@ node --test scripts/collect-public-questions.test.mjs
 - Cached evidence becomes stale and must retain its retrieval date.
 - Missing Answer deliberately prefers one strong finding over a broad list of
   weak suggestions.
+- A successful second-company end-to-end run has not yet been recorded.
 - Every proposed change remains a draft until a human reviews it.
 
 ## License
