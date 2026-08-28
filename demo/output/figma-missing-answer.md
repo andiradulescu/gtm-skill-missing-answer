@@ -13,6 +13,7 @@ without creating or signing in to a Figma account?
 > in users cannot provide feedback without registering? Is this still the case?”
 
 - URL: <https://forum.figma.com/suggest-a-feature-11/guest-comments-voting-for-clients-w-o-account-19333>
+- Source date: 2022-05-07
 - Retrieved: 2026-08-28
 - Context: An evaluator trying Figma said the account requirement would prevent
   migration.
@@ -22,6 +23,7 @@ without creating or signing in to a Figma account?
 > “Do you know if clients can comment on a prototype without a Figma account?”
 
 - URL: <https://www.reddit.com/r/FigmaDesign/comments/yqw5x5/how_do_i_share_a_prototype_with_a_client_that/>
+- Source date: 2022-11-10
 - Retrieved: 2026-08-28
 - Context: A user had created a prototype share link and was checking the
   client workflow.

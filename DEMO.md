@@ -25,7 +25,7 @@
 
 **Evidence:** The Markdown output preserves both verbatim questions, their public source URLs, the checked customer-facing pages, the official help answer, the 2026-08-28 retrieval date, confidence, and limitations.
 
-**Fallback output:** The committed Markdown finding and HTML preview use only the dated Figma snapshot. The preview is visibly labeled as a local review-only draft and makes no network requests.
+**Fallback output:** The exact seed ran from a clean clone of commit `9303c44` with Codex v0.150.1, `gpt-5.6-sol`, and low reasoning. It used only the dated Figma snapshot, produced the committed Markdown finding and HTML preview, made no network requests, and did not modify the live site.
 
 ## Evals — 10 seconds
 

@@ -32,6 +32,16 @@ by this clean-clone run.
 
 ## Run context
 
+- **Official Figma seed runner:** Codex v0.150.1, `gpt-5.6-sol`, low reasoning,
+  ran the exact submitted seed from a clean clone of commit `9303c44` in thread
+  `01a0494f-93d0-7130-9633-14a932b0a4bc`. It started
+  2026-08-28T16:59:07Z, finished 16:59:43Z, and exited 0. It used only
+  `demo/input/figma.md`, returned `BURIED ANSWER`, wrote both output artifacts,
+  parsed the HTML successfully, made no network requests, and did not modify
+  the live site. The resulting Markdown SHA-256 is
+  `1e1089382d43adf7bac5015cef7d328f5bb8b9453d6821244a4fccf9746edb00`;
+  the HTML SHA-256 is
+  `77d826019b61d89e57490ed7e07e9c8190d25a115e30d495db5935f2ed3a42f9`.
 - **Intended and safety runner:** Codex v0.150.1, `gpt-5.6-sol`, low reasoning.
   Intended run: 2026-08-28T19:42:55+03:00, thread
   `01a04940-bde1-7333-af99-d318ce9f8e45`, duration 22.417 s. Safety run:
@@ -49,9 +59,9 @@ by this clean-clone run.
   four prompt-named cached inputs, and wrote the recorded abstention. The run
   matched all 13 unique question URLs back to the snapshots and verified that
   no positive classification, page-change section, or preview was present.
-- **Local preview:** the intended HTML renders only the proposed insertion,
-  visibly labels itself as a local review-only draft, and makes no network
-  requests.
+- **Local preview:** the exact Figma seed wrote the intended HTML. It renders
+  only the proposed insertion, visibly labels itself as a local review-only
+  draft, includes the snapshot date, and makes no network requests.
 - **Figma provenance:** the two public-question URLs and cited Figma
   marketing/help excerpts were live-verified on 2026-08-28, then used as the
   static evidence in `demo/input/figma.md`. No additional Figma

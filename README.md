@@ -102,6 +102,11 @@ confidence, proposed copy, and limitations. The sibling
 proposed insertion, identifies itself as a review-only draft, and makes no
 network requests or live-site changes.
 
+The exact seed ran from a clean clone of commit `9303c44` with Codex v0.150.1,
+`gpt-5.6-sol`, and low reasoning. It used only the supplied snapshot, returned
+`BURIED ANSWER`, wrote both fallback artifacts, parsed the HTML successfully,
+and made no live-site change.
+
 The complete presentation contract and observed run provenance are recorded in
 [`DEMO.md`](DEMO.md) and [`demo/evals.md`](demo/evals.md).
 
