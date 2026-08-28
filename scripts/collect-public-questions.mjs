@@ -105,8 +105,20 @@ function textField(value, names) {
   return '';
 }
 
+function decodeHtmlEntities(value) {
+  const named = { amp: '&', apos: "'", gt: '>', lt: '<', nbsp: ' ', quot: '"' };
+  return value.replace(/&(?:#(\d+)|#x([0-9a-f]+)|([a-z]+));/gi, (entity, decimal, hexadecimal, name) => {
+    if (decimal) return String.fromCodePoint(Number.parseInt(decimal, 10));
+    if (hexadecimal) return String.fromCodePoint(Number.parseInt(hexadecimal, 16));
+    return named[name.toLowerCase()] ?? entity;
+  });
+}
+
 function sanitize(value) {
-  return value.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[redacted-email]').replace(/(^|\s)@[A-Z0-9_][A-Z0-9_.-]*/gi, '$1[redacted-handle]');
+  return decodeHtmlEntities(value)
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[redacted-email]')
+    .replace(/(^|\s)@[A-Z0-9_][A-Z0-9_.-]*/gi, '$1[redacted-handle]')
+    .replace(/(^|[\s(])(?:\/u\/|u\/)[A-Z0-9_-]+/gi, '$1[redacted-author]');
 }
 
 function canonicalRedditUrl(rawUrl) {
@@ -176,6 +188,8 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
   const candidateByUrl = new Map(candidates.map((candidate) => [candidate.source_url, candidate]));
   const seen = new Set();
   const rawAuthors = new Set();
+  const seenAuthors = new Set();
+  let duplicateAuthorPostsExcluded = 0;
   const questions = [];
   for (const post of reddit) {
     if (textField(post, ['dataType', 'type']).toLowerCase() !== 'post') continue;
@@ -188,8 +202,13 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
     const question = explicitQuestion(title, body);
     const key = question.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
     if (!question || seen.has(key)) continue;
-    seen.add(key);
     const rawAuthor = textField(post, ['username', 'userId', 'author', 'authorName']);
+    if (rawAuthor && seenAuthors.has(rawAuthor)) {
+      duplicateAuthorPostsExcluded += 1;
+      continue;
+    }
+    seen.add(key);
+    if (rawAuthor) seenAuthors.add(rawAuthor);
     if (rawAuthor) rawAuthors.add(rawAuthor);
     const excerpt = sanitize(body.replace(/\s+/g, ' ').trim()).slice(0, 280);
     questions.push({
@@ -202,6 +221,8 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
       source_type: 'reddit_post',
       discovery_query: candidate.discovery_query,
       validation: 'fetched-source',
+      author_available: Boolean(rawAuthor),
+      author_redacted: Boolean(rawAuthor),
       created_at: textField(post, ['createdAt', 'created_at', 'date']) || null,
       retrieved_at: retrievedAt,
     });
@@ -218,7 +239,11 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
     },
     queries: mode === 'live-apify' ? liveQueries : fixtureQueries,
     discovered_sources: candidates,
-    independence_check: { distinct_authors_verified_at_collection: rawAuthors.size >= 2 },
+    independence_check: {
+      distinct_authors_verified_at_collection: rawAuthors.size >= 2,
+      accepted_posts_with_author: rawAuthors.size,
+      duplicate_author_posts_excluded: duplicateAuthorPostsExcluded,
+    },
     questions,
   };
 }
