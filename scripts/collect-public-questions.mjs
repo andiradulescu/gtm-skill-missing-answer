@@ -3,15 +3,20 @@
 import { readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const ACTOR_ID = 'apify~google-search-scraper';
-const APIFY_ENDPOINT = `https://api.apify.com/v2/actors/${ACTOR_ID}/run-sync-get-dataset-items?timeout=120&maxTotalChargeUsd=0.10&clean=true`;
+const GOOGLE_ACTOR = 'apify~google-search-scraper';
+const REDDIT_ACTOR = 'trudax~reddit-scraper-lite';
 const QUESTION_START = /^(?:who|what|when|where|why|how|can|could|does|do|is|are|should|would|which)\b/i;
+
+function actorEndpoint(actor) {
+  return `https://api.apify.com/v2/actors/${actor}/run-sync-get-dataset-items?timeout=120&maxTotalChargeUsd=1.00&clean=true`;
+}
 
 function parseArguments(argv) {
   const options = {};
+  const names = { '--company': 'company', '--domain': 'domain', '--output': 'output', '--raw-fixture': 'rawFixture', '--queries': 'queries' };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
-    const name = { '--company': 'company', '--domain': 'domain', '--output': 'output', '--raw-fixture': 'rawFixture', '--queries': 'queries' }[argument];
+    const name = names[argument];
     if (!name) throw new Error(`Unknown argument: ${argument}`);
     const value = argv[index + 1];
     if (!value || value.startsWith('--')) throw new Error(`${argument} requires a value`);
@@ -22,14 +27,9 @@ function parseArguments(argv) {
     if (!options[required]) throw new Error(`--${required} is required`);
   }
   let domain;
-  try {
-    domain = new URL(`https://${options.domain}`).hostname.toLowerCase().replace(/\.$/, '');
-  } catch {
-    throw new Error('--domain must be a valid hostname');
-  }
-  if (domain !== options.domain.toLowerCase().replace(/\.$/, '') || domain.includes('/') || !domain.includes('.')) {
-    throw new Error('--domain must be a bare hostname');
-  }
+  try { domain = new URL(`https://${options.domain}`).hostname.toLowerCase().replace(/\.$/, ''); }
+  catch { throw new Error('--domain must be a valid hostname'); }
+  if (domain !== options.domain.toLowerCase().replace(/\.$/, '') || !domain.includes('.')) throw new Error('--domain must be a bare hostname');
   return { ...options, company: options.company.trim(), domain };
 }
 
@@ -38,7 +38,8 @@ function boundedQueries(company, domain, supplied) {
     ? supplied.split(/[\n,]/).map((value) => value.trim()).filter(Boolean)
     : [`${company} alternatives`, `${company} reviews`, `${company} pricing questions`, `${company} limitations`, `site:reddit.com ${company}`];
   if (values.length === 0 || values.length > 8) throw new Error('--queries must contain between 1 and 8 queries');
-  return values.map((query) => `${query.replace(new RegExp(`\\s+-site:${domain.replaceAll('.', '\\.')}(?=\\s|$)`, 'gi'), '')} -site:${domain}`);
+  const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return values.map((query) => `${query.replace(new RegExp(`\\s*-site:${escapedDomain}(?=\\s|$)`, 'gi'), '').trim()} -site:${domain}`);
 }
 
 function parseDotEnv(contents) {
@@ -65,34 +66,34 @@ async function loadToken() {
   throw new Error('APIFY_TOKEN is required in the environment or cwd .env');
 }
 
-function requireDataset(value) {
+function requireArray(value, label) {
   if (!Array.isArray(value) || value.some((item) => !item || typeof item !== 'object' || Array.isArray(item))) {
-    throw new Error('Raw data must be a JSON array of result objects');
+    throw new Error(`${label} must be a JSON array of objects`);
   }
   return value;
 }
 
 async function readFixture(filename) {
-  try {
-    return requireDataset(JSON.parse(await readFile(filename, 'utf8')));
-  } catch (error) {
+  let fixture;
+  try { fixture = JSON.parse(await readFile(filename, 'utf8')); }
+  catch (error) {
     if (error instanceof SyntaxError) throw new Error(`Invalid JSON in fixture: ${error.message}`);
     throw error;
   }
+  if (!fixture || typeof fixture !== 'object' || Array.isArray(fixture)) throw new Error('Fixture must be an object with discovery and reddit arrays');
+  return { discovery: requireArray(fixture.discovery, 'Fixture discovery'), reddit: requireArray(fixture.reddit, 'Fixture reddit') };
 }
 
-async function collectLive(queries) {
-  const token = await loadToken();
-  const response = await fetch(APIFY_ENDPOINT, {
+async function runActor(actor, token, input) {
+  const response = await fetch(actorEndpoint(actor), {
     method: 'POST',
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ queries: queries.join('\n'), maxPagesPerQuery: 1, resultsPerPage: 10 }),
+    body: JSON.stringify(input),
   });
-  if (!response.ok) throw new Error(`Apify API request failed with HTTP ${response.status}`);
-  try {
-    return requireDataset(await response.json());
-  } catch (error) {
-    if (error instanceof SyntaxError) throw new Error(`Apify API returned invalid JSON: ${error.message}`);
+  if (!response.ok) throw new Error(`${actor} API request failed with HTTP ${response.status}`);
+  try { return requireArray(await response.json(), `${actor} response`); }
+  catch (error) {
+    if (error instanceof SyntaxError) throw new Error(`${actor} API returned invalid JSON: ${error.message}`);
     throw error;
   }
 }
@@ -104,50 +105,120 @@ function textField(value, names) {
   return '';
 }
 
-function sanitizeContext(value) {
+function sanitize(value) {
   return value.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[redacted-email]').replace(/(^|\s)@[A-Z0-9_][A-Z0-9_.-]*/gi, '$1[redacted-handle]');
 }
 
-function sourceDetails(rawUrl, excludedDomain) {
+function canonicalRedditUrl(rawUrl) {
   let url;
   try { url = new URL(rawUrl); } catch { return null; }
-  if (!['http:', 'https:'].includes(url.protocol)) return null;
-  const domain = url.hostname.toLowerCase().replace(/\.$/, '');
-  if (domain === excludedDomain || domain.endsWith(`.${excludedDomain}`)) return null;
-  return { source_url: url.href, source_domain: domain };
+  const hostname = url.hostname.toLowerCase().replace(/\.$/, '');
+  if (url.protocol !== 'https:' || !['reddit.com', 'www.reddit.com'].includes(hostname)) return null;
+  if (!/^\/r\/[^/]+\/comments\/[^/]+(?:\/[^/]*)?\/?$/i.test(url.pathname)) return null;
+  url.hostname = 'www.reddit.com';
+  url.search = '';
+  url.hash = '';
+  url.pathname = `${url.pathname.replace(/\/+$/, '')}/`;
+  return url.href;
 }
 
-function normalize(dataset, { company, domain, mode, liveQueries }) {
-  const retrievedAt = new Date().toISOString();
-  const questions = [];
-  const seen = new Set();
-  const discoveredQueries = [];
-  for (const item of dataset) {
-    const query = textField(item?.searchQuery, ['term', 'query']) || textField(item, ['query', 'searchQuery']) || 'unknown';
-    if (query !== 'unknown' && !discoveredQueries.includes(query)) discoveredQueries.push(query);
-    for (const [sourceType, candidates] of [['organic_result', item.organicResults], ['people_also_ask', item.peopleAlsoAsk]]) {
-      if (candidates === undefined) continue;
-      if (!Array.isArray(candidates)) throw new Error(`${sourceType} must be an array`);
-      for (const candidate of candidates) {
-        if (!candidate || typeof candidate !== 'object') throw new Error(`${sourceType} entries must be objects`);
-        const question = textField(candidate, ['question', 'title']).replace(/\s+/g, ' ');
-        const source = sourceDetails(textField(candidate, ['url', 'link']), domain);
-        const explicitQuestion = question.endsWith('?') || QUESTION_START.test(question);
-        const key = question.toLocaleLowerCase().trim();
-        if (!question || !explicitQuestion || !source || seen.has(key)) continue;
-        seen.add(key);
-        questions.push({ question, ...source, source_type: sourceType, discovery_query: query, retrieved_at: retrievedAt, context: sanitizeContext(textField(candidate, ['description', 'snippet'])) });
+function discoverRedditUrls(discovery) {
+  const candidates = [];
+  const queries = [];
+  for (const resultPage of discovery) {
+    const query = textField(resultPage?.searchQuery, ['term', 'query']) || textField(resultPage, ['query', 'searchQuery']) || 'unknown';
+    if (query !== 'unknown' && !queries.includes(query)) queries.push(query);
+    if (resultPage.organicResults !== undefined && !Array.isArray(resultPage.organicResults)) throw new Error('organicResults must be an array');
+    if (resultPage.peopleAlsoAsk !== undefined && !Array.isArray(resultPage.peopleAlsoAsk)) throw new Error('peopleAlsoAsk must be an array');
+    for (const result of resultPage.organicResults ?? []) {
+      const sourceUrl = canonicalRedditUrl(textField(result, ['url', 'link']));
+      if (sourceUrl && !candidates.some((candidate) => candidate.source_url === sourceUrl)) {
+        candidates.push({ source_url: sourceUrl, source_platform: 'reddit', discovery_query: query });
       }
+      if (candidates.length === 10) return { candidates, queries };
     }
   }
-  if (questions.length === 0) throw new Error('No qualifying third-party questions were found');
+  return { candidates, queries };
+}
+
+async function collectLive(queries) {
+  const token = await loadToken();
+  const discovery = await runActor(GOOGLE_ACTOR, token, { queries: queries.join('\n'), maxPagesPerQuery: 1, resultsPerPage: 10 });
+  const { candidates } = discoverRedditUrls(discovery);
+  if (candidates.length === 0) return { discovery, reddit: [] };
+  const reddit = await runActor(REDDIT_ACTOR, token, {
+    startUrls: candidates.map(({ source_url }) => ({ url: source_url })),
+    skipComments: true,
+    includeMediaLinks: false,
+    includeNSFW: false,
+    maxItems: 10,
+    maxPostCount: 10,
+    maxComments: 0,
+  });
+  return { discovery, reddit };
+}
+
+function explicitQuestion(title, body) {
+  const cleanTitle = title.replace(/\s+/g, ' ').trim();
+  if (cleanTitle.endsWith('?') || QUESTION_START.test(cleanTitle)) return cleanTitle.slice(0, 280);
+  for (const line of body.split(/\r?\n/)) {
+    const clean = line.replace(/\s+/g, ' ').trim();
+    const match = clean.match(/^(.{1,279}?\?)(?:\s|$)/);
+    if (match && QUESTION_START.test(match[1])) return match[1];
+    if (QUESTION_START.test(clean) && clean.length <= 280) return clean;
+  }
+  return '';
+}
+
+function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }) {
+  const retrievedAt = new Date().toISOString();
+  const { candidates, queries: fixtureQueries } = discoverRedditUrls(discovery);
+  const candidateByUrl = new Map(candidates.map((candidate) => [candidate.source_url, candidate]));
+  const seen = new Set();
+  const rawAuthors = new Set();
+  const questions = [];
+  for (const post of reddit) {
+    if (textField(post, ['dataType', 'type']).toLowerCase() !== 'post') continue;
+    const sourceUrl = canonicalRedditUrl(textField(post, ['canonicalUrl', 'url', 'postUrl', 'link']));
+    const candidate = candidateByUrl.get(sourceUrl);
+    if (!candidate || post.isDeleted === true || post.isRemoved === true || post.deleted === true || post.removed === true) continue;
+    const title = textField(post, ['title']);
+    const body = textField(post, ['body', 'text', 'selftext']);
+    if (/^\[(?:deleted|removed)\]$/i.test(title) || /^\[(?:deleted|removed)\]$/i.test(body)) continue;
+    const question = explicitQuestion(title, body);
+    const key = question.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+    if (!question || seen.has(key)) continue;
+    seen.add(key);
+    const rawAuthor = textField(post, ['username', 'userId', 'author', 'authorName']);
+    if (rawAuthor) rawAuthors.add(rawAuthor);
+    const excerpt = sanitize(body.replace(/\s+/g, ' ').trim()).slice(0, 280);
+    questions.push({
+      question: sanitize(question),
+      excerpt,
+      context: excerpt,
+      source_url: sourceUrl,
+      source_domain: 'www.reddit.com',
+      source_platform: 'reddit',
+      source_type: 'reddit_post',
+      discovery_query: candidate.discovery_query,
+      validation: 'fetched-source',
+      created_at: textField(post, ['createdAt', 'created_at', 'date']) || null,
+      retrieved_at: retrievedAt,
+    });
+  }
+  if (questions.length === 0) throw new Error('No qualifying fetched Reddit questions were found');
   return {
     schema_version: 1,
     subject: { name: company, domain },
     retrieved_at: retrievedAt,
     collection_mode: mode,
-    actor: { id: ACTOR_ID, endpoint: APIFY_ENDPOINT, max_pages_per_query: 1, results_per_page: 10 },
-    queries: mode === 'live-apify' ? liveQueries : discoveredQueries,
+    actors: {
+      discovery: { id: GOOGLE_ACTOR, endpoint: actorEndpoint(GOOGLE_ACTOR), max_pages_per_query: 1, results_per_page: 10 },
+      validation: { id: REDDIT_ACTOR, endpoint: actorEndpoint(REDDIT_ACTOR), max_source_urls: 10, comments: false },
+    },
+    queries: mode === 'live-apify' ? liveQueries : fixtureQueries,
+    discovered_sources: candidates,
+    independence_check: { distinct_authors_verified_at_collection: rawAuthors.size >= 2 },
     questions,
   };
 }
@@ -168,8 +239,8 @@ async function main() {
   const options = parseArguments(process.argv.slice(2));
   const queries = boundedQueries(options.company, options.domain, options.queries);
   const mode = options.rawFixture ? 'fixture' : 'live-apify';
-  const dataset = options.rawFixture ? await readFixture(options.rawFixture) : await collectLive(queries);
-  await writeJsonAtomically(options.output, normalize(dataset, { ...options, mode, liveQueries: queries }));
+  const raw = options.rawFixture ? await readFixture(options.rawFixture) : await collectLive(queries);
+  await writeJsonAtomically(options.output, normalize(raw, { ...options, mode, liveQueries: queries }));
 }
 
 main().catch((error) => {

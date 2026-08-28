@@ -75,7 +75,8 @@ test('Planable fixture accepts only fetched Reddit posts discovered through Goog
   assert.ok(!JSON.stringify(collected).includes('sam@example.com'));
   assert.ok(!JSON.stringify(collected).includes('@socialexpert'));
   assert.ok(!JSON.stringify(collected).includes('private_author'));
-  assert.ok(!JSON.stringify(collected).includes('42'));
+  assert.ok(collected.questions.every((question) => !('score' in question)));
+  assert.deepEqual(collected.independence_check, { distinct_authors_verified_at_collection: false });
 });
 
 test('stock.estate fixture excludes the apex domain and subdomains after URL parsing', async () => {
