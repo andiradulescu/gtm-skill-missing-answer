@@ -2,6 +2,7 @@
 
 import { readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const GOOGLE_ACTOR = 'apify~google-search-scraper';
 const REDDIT_ACTOR = 'trudax~reddit-scraper-lite';
@@ -11,6 +12,13 @@ const DEFAULT_MAX_PAGES_PER_QUERY = 3;
 const RESULTS_PER_PAGE = 100;
 const MAX_SOURCE_URLS_LIMIT = 200;
 const MAX_PAGES_PER_QUERY_LIMIT = 10;
+const APIFY_API = 'https://api.apify.com';
+const REDDIT_MAX_CHARGE_USD = 8;
+const REDDIT_MAX_ITEMS = 5000;
+const REDDIT_MAX_COMMENTS = 40;
+const REDDIT_POLL_INTERVAL_MS = 5000;
+const REDDIT_MAX_WAIT_MS = 15 * 60 * 1000;
+const TERMINAL_RUN_STATUSES = new Set(['SUCCEEDED', 'FAILED', 'ABORTED', 'TIMED-OUT']);
 
 function actorEndpoint(actor) {
   return `https://api.apify.com/v2/actors/${actor}/run-sync-get-dataset-items?timeout=120&maxTotalChargeUsd=1.00&clean=true`;
@@ -125,6 +133,71 @@ async function runActor(actor, token, input) {
   }
 }
 
+async function responseJson(response, label) {
+  if (!response.ok) throw new Error(`${label} failed with HTTP ${response.status}`);
+  try { return JSON.parse(await response.text()); }
+  catch { throw new Error(`${label} returned invalid JSON`); }
+}
+
+function actorRunRecord(value, label) {
+  const run = value?.data;
+  if (!run || typeof run !== 'object' || typeof run.id !== 'string' || typeof run.status !== 'string') {
+    throw new Error(`${label} did not return a valid actor run`);
+  }
+  return run;
+}
+
+export async function runRedditActorAsync(token, startUrls, dependencies = {}) {
+  const {
+    fetchImpl = fetch,
+    sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    now = Date.now,
+    pollIntervalMs = REDDIT_POLL_INTERVAL_MS,
+    maxWaitMs = REDDIT_MAX_WAIT_MS,
+    onProgress = () => {},
+  } = dependencies;
+  if (!Array.isArray(startUrls) || startUrls.length === 0 || startUrls.length > MAX_SOURCE_URLS_LIMIT) {
+    throw new Error(`Reddit actor requires between 1 and ${MAX_SOURCE_URLS_LIMIT} source URLs`);
+  }
+  const headers = { authorization: `Bearer ${token}`, 'content-type': 'application/json' };
+  const input = {
+    startUrls,
+    skipComments: false,
+    includeMediaLinks: false,
+    includeNSFW: false,
+    maxComments: REDDIT_MAX_COMMENTS,
+    maxPostCount: startUrls.length,
+    maxItems: Math.min(REDDIT_MAX_ITEMS, Math.max(50, startUrls.length * 50)),
+  };
+  const startResponse = await fetchImpl(
+    `${APIFY_API}/v2/acts/${REDDIT_ACTOR}/runs?maxTotalChargeUsd=${REDDIT_MAX_CHARGE_USD}`,
+    { method: 'POST', headers, body: JSON.stringify(input) },
+  );
+  let run = actorRunRecord(await responseJson(startResponse, 'Reddit actor start'), 'Reddit actor start');
+  const startedAt = now();
+  onProgress(run.status);
+
+  while (!TERMINAL_RUN_STATUSES.has(run.status)) {
+    await sleep(pollIntervalMs);
+    if (now() - startedAt >= maxWaitMs) throw new Error(`Reddit actor run did not complete within ${maxWaitMs} ms`);
+    const statusResponse = await fetchImpl(`${APIFY_API}/v2/actor-runs/${encodeURIComponent(run.id)}`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    run = actorRunRecord(await responseJson(statusResponse, 'Reddit actor status'), 'Reddit actor status');
+    onProgress(run.status);
+  }
+
+  if (run.status !== 'SUCCEEDED') throw new Error(`Reddit actor run failed with status ${run.status}`);
+  if (typeof run.defaultDatasetId !== 'string' || !run.defaultDatasetId) {
+    throw new Error('Successful Reddit actor run did not return a dataset');
+  }
+  const datasetResponse = await fetchImpl(
+    `${APIFY_API}/v2/datasets/${encodeURIComponent(run.defaultDatasetId)}/items?clean=true`,
+    { headers: { authorization: `Bearer ${token}` } },
+  );
+  return requireArray(await responseJson(datasetResponse, 'Reddit actor dataset'), 'Reddit actor dataset');
+}
+
 function textField(value, names) {
   for (const name of names) {
     if (typeof value?.[name] === 'string' && value[name].trim()) return value[name].trim();
@@ -200,15 +273,11 @@ async function collectLive(queries, { maxSourceUrls, maxPagesPerQuery }) {
   });
   const { candidates } = discoverRedditUrls(discovery, maxSourceUrls);
   if (candidates.length === 0) return { discovery, reddit: [] };
-  const reddit = await runActor(REDDIT_ACTOR, token, {
-    startUrls: candidates.map(({ source_url }) => ({ url: source_url })),
-    skipComments: false,
-    includeMediaLinks: false,
-    includeNSFW: false,
-    maxItems: maxSourceUrls * 10,
-    maxPostCount: maxSourceUrls,
-    maxComments: maxSourceUrls * 9,
-  });
+  const reddit = await runRedditActorAsync(
+    token,
+    candidates.map(({ source_url }) => ({ url: source_url })),
+    { onProgress: (status) => console.error(`collect-public-questions: Reddit actor ${status}`) },
+  );
   return { discovery, reddit };
 }
 
@@ -369,7 +438,9 @@ async function main() {
   await writeJsonAtomically(options.output, normalize(raw, { ...options, mode, liveQueries: queries }));
 }
 
-main().catch((error) => {
-  console.error(`collect-public-questions: ${error.message}`);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(`collect-public-questions: ${error.message}`);
+    process.exitCode = 1;
+  });
+}

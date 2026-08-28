@@ -5,6 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { runRedditActorAsync } from './collect-public-questions.mjs';
 
 const script = fileURLToPath(new URL('./collect-public-questions.mjs', import.meta.url));
 
@@ -278,4 +279,78 @@ test('live mode fails meaningfully when APIFY_TOKEN is unavailable', async () =>
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /APIFY_TOKEN/);
   assert.doesNotMatch(result.stdout + result.stderr, /Bearer/);
+});
+
+test('async Reddit actor waits for success before fetching its clean dataset', async () => {
+  const startUrls = Array.from({ length: 117 }, (_, index) => ({
+    url: `https://www.reddit.com/r/test/comments/post${index}/title_${index}/`,
+  }));
+  const requests = [];
+  const responses = [
+    { data: { id: 'run-1', status: 'READY' } },
+    { data: { id: 'run-1', status: 'RUNNING' } },
+    { data: { id: 'run-1', status: 'SUCCEEDED', defaultDatasetId: 'dataset-1' } },
+    [{ dataType: 'post', url: 'https://www.reddit.com/r/test/comments/abc/title/' }],
+  ];
+  const progress = [];
+  const rows = await runRedditActorAsync('secret-token', startUrls, {
+    fetchImpl: async (url, options = {}) => {
+      requests.push({ url: String(url), options });
+      return new Response(JSON.stringify(responses.shift()), { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+    sleep: async () => {},
+    now: (() => { let value = 0; return () => value += 10; })(),
+    pollIntervalMs: 1,
+    maxWaitMs: 100,
+    onProgress: (status) => progress.push(status),
+  });
+
+  assert.equal(rows.length, 1);
+  assert.match(requests[0].url, /\/v2\/acts\/trudax~reddit-scraper-lite\/runs\?maxTotalChargeUsd=8$/);
+  const input = JSON.parse(requests[0].options.body);
+  assert.equal(input.skipComments, false);
+  assert.equal(input.maxComments, 40);
+  assert.equal(input.maxPostCount, 117);
+  assert.equal(input.maxItems, 5000);
+  assert.match(requests.at(-1).url, /\/v2\/datasets\/dataset-1\/items\?clean=true$/);
+  assert.deepEqual(progress, ['READY', 'RUNNING', 'SUCCEEDED']);
+  assert.ok(!JSON.stringify(progress).includes('secret-token'));
+});
+
+test('async Reddit actor reports terminal failure without fetching a dataset', async () => {
+  let requestCount = 0;
+  await assert.rejects(
+    runRedditActorAsync('token', [{ url: 'https://www.reddit.com/r/test/comments/abc/title/' }], {
+      fetchImpl: async () => {
+        requestCount += 1;
+        const payload = requestCount === 1
+          ? { data: { id: 'run-failed', status: 'READY' } }
+          : { data: { id: 'run-failed', status: 'FAILED', defaultDatasetId: 'must-not-fetch', errorMessage: 'raw private payload' } };
+        return new Response(JSON.stringify(payload), { status: 200 });
+      },
+      sleep: async () => {},
+      now: () => 0,
+    }),
+    /Reddit actor run failed with status FAILED/,
+  );
+  assert.equal(requestCount, 2);
+});
+
+test('async Reddit actor stops at its poll deadline without producing partial rows', async () => {
+  let requestCount = 0;
+  let clock = 0;
+  await assert.rejects(
+    runRedditActorAsync('token', [{ url: 'https://www.reddit.com/r/test/comments/abc/title/' }], {
+      fetchImpl: async () => {
+        requestCount += 1;
+        return new Response(JSON.stringify({ data: { id: 'run-slow', status: requestCount === 1 ? 'READY' : 'RUNNING' } }), { status: 200 });
+      },
+      sleep: async () => { clock += 6; },
+      now: () => clock,
+      pollIntervalMs: 6,
+      maxWaitMs: 10,
+    }),
+    /did not complete within 10 ms/,
+  );
+  assert.equal(requestCount, 2);
 });
