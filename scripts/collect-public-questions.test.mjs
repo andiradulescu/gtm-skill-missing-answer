@@ -159,6 +159,97 @@ test('redacts Reddit attribution and excludes crossposts from the same author', 
   assert.ok(!JSON.stringify(collected).includes('/u/'));
 });
 
+test('expands bounded discovery and retains only fetched qualifying Reddit comments', async () => {
+  const discoveredPosts = Array.from({ length: 105 }, (_, index) => ({
+    title: `Planable discussion ${index}`,
+    url: `https://www.reddit.com/r/socialmedia/comments/post${index}/planable_discussion_${index}/`,
+  }));
+  const parentUrl = discoveredPosts[0].url;
+  const duplicateAuthorPostUrl = discoveredPosts[1].url;
+  const { result, output } = await runFixture({
+    company: 'Planable',
+    domain: 'planable.io',
+    raw: {
+      discovery: [{
+        searchQuery: { term: 'site:reddit.com Planable -site:planable.io' },
+        organicResults: discoveredPosts,
+        peopleAlsoAsk: [{
+          question: 'Does Planable let clients approve without an account?',
+          link: 'https://www.reddit.com/r/socialmedia/comments/paa/not_a_fetched_source/',
+        }],
+      }],
+      reddit: [
+        {
+          dataType: 'post',
+          url: parentUrl,
+          title: 'Planable workflow discussion',
+          body: 'We are evaluating Planable for client review at our agency.',
+          username: 'parent_author',
+          createdAt: '2026-08-20T10:00:00.000Z',
+        },
+        {
+          dataType: 'comment',
+          url: `${parentUrl}comment1/`,
+          postUrl: parentUrl,
+          body: 'Does it let clients approve without an account?',
+          username: 'comment_author',
+          createdAt: '2026-08-20T11:00:00.000Z',
+        },
+        {
+          dataType: 'comment',
+          url: `${parentUrl}comment2/`,
+          postUrl: parentUrl,
+          body: 'I wonder whether approvals need an account.',
+          username: 'not_an_interrogative',
+        },
+        {
+          dataType: 'comment',
+          url: `${parentUrl}comment3/`,
+          postUrl: parentUrl,
+          body: '[removed]',
+          username: 'removed_author',
+        },
+        {
+          dataType: 'comment',
+          url: `${parentUrl}comment4/`,
+          postUrl: parentUrl,
+          body: 'Does it support this workflow?',
+        },
+        {
+          dataType: 'post',
+          url: duplicateAuthorPostUrl,
+          title: 'Can Planable handle agency approvals?',
+          body: 'I am evaluating the product.',
+          username: 'comment_author',
+          createdAt: '2026-08-21T11:00:00.000Z',
+        },
+      ],
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const collected = JSON.parse(await readFile(output, 'utf8'));
+  assert.equal(collected.discovery_summary.canonical_reddit_urls_found, 105);
+  assert.ok(collected.actors.discovery.max_pages_per_query > 1);
+  assert.ok(collected.actors.discovery.results_per_page >= 100);
+  assert.ok(collected.actors.validation.max_source_urls >= 100);
+  assert.equal(collected.actors.validation.comments, true);
+  assert.deepEqual(collected.questions.map(({ question }) => question), [
+    'Does it let clients approve without an account?',
+  ]);
+  assert.equal(collected.questions[0].source_type, 'reddit_comment');
+  assert.equal(collected.questions[0].source_url, `${parentUrl}comment1/`);
+  assert.equal(collected.questions[0].excerpt, 'Does it let clients approve without an account?');
+  assert.equal(collected.questions[0].context, 'We are evaluating Planable for client review at our agency.');
+  assert.equal(collected.questions[0].created_at, '2026-08-20T11:00:00.000Z');
+  assert.equal(collected.questions[0].validation, 'fetched-source');
+  assert.equal(collected.independence_check.accepted_questions_with_author, 1);
+  assert.equal(collected.independence_check.duplicate_author_questions_excluded, 1);
+  assert.equal(collected.independence_check.unverifiable_author_questions_excluded, 1);
+  assert.ok(!JSON.stringify(collected).includes('comment_author'));
+  assert.ok(!collected.questions.some(({ source_url }) => source_url.includes('/paa/')));
+});
+
 test('live mode fails meaningfully when APIFY_TOKEN is unavailable', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'public-question-collector-'));
   const output = path.join(directory, 'questions.json');
