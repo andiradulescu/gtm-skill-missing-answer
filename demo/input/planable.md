@@ -3,17 +3,21 @@
 - Target: <https://planable.io/>
 - Retrieved: 2026-08-28
 - Public-question snapshot: [`planable-public-questions.json`](planable-public-questions.json)
+- Expanded Reddit question snapshot: [`planable-reddit-expanded-questions.json`](planable-reddit-expanded-questions.json)
 - G2 question snapshot: [`planable-g2-public-questions.json`](planable-g2-public-questions.json)
 
 This is a dated, cached input for the Planable demo. It is not a live crawl. The
 linked JSON records two independently authored Reddit posts whose authors were
 verified during collection and then redacted. The G2 snapshot records six more
 canonically fetched questions from six distinct authors, with the same identity
-redaction boundary.
+redaction boundary. The expanded Reddit snapshot records six curated questions
+from six distinct authors, one of which overlaps the smaller Reddit snapshot.
+Together, the linked files contain seven distinct Reddit questions and six G2
+questions.
 
 ## Evidence contract
 
-- Use the two linked JSON snapshots only for
+- Use the three linked JSON snapshots only for
   public-question evidence. Preserve their source URLs, timestamps, redaction,
   and independence limits.
 - Use only the first-party pages below for Planable feature and answer evidence.
@@ -37,6 +41,22 @@ asks about automatic Story publishing and the other about Story interactivity.
 This joins related workflow needs, but the wording and requested capabilities
 are not identical. The other four G2 questions do not form a repeated
 two-person semantic cluster in this snapshot.
+
+## Expanded Reddit question evidence
+
+The expanded Reddit snapshot is a privacy-reduced subset of 942 fetched Reddit
+rows discovered through Google Search Scraper and validated with Reddit Scraper
+Lite. It contains five post questions and one comment question from six distinct
+authors. The validation run was deliberately aborted after its emitted rows
+were saved, so the snapshot does not claim complete coverage of all 117
+discovered post URLs.
+
+Four authors fall within a broad alternatives-and-affordability cluster, three
+within pre-purchase evaluation, and two within client approval workflow. These
+are overlapping semantic groupings, not counts of identical questions. The
+questions differ in incumbent tool, price concern, required workflow, analytics,
+or draft-quality context. The linked JSON preserves these breadth limitations
+and does not make a website-gap judgment.
 
 ## Pricing and the per-workspace model
 
@@ -203,9 +223,12 @@ for a recipient who has never had a Planable account remains unknown.
 
 ## Snapshot limitations
 
-- The question evidence contains two Reddit questions and six G2 questions.
-  Only the provisional two-person Story workflow cluster repeats at a broader
-  semantic level; automatic publishing and interactivity are not identical asks.
+- The question evidence contains seven distinct Reddit questions and six G2
+  questions. The expanded Reddit file contains six questions, including one
+  question already present in the smaller two-question Reddit snapshot.
+  Within the G2 snapshot, only the provisional two-person Story workflow cluster
+  repeats at a broader semantic level; automatic publishing and interactivity
+  are not identical asks.
 - The first-party pages were inspected as public web pages on 2026-08-28. Their
   content, prices, and product behavior may change.
 - No authenticated Planable workspace, billing checkout, approver invitation,

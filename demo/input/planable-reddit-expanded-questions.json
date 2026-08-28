@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "subject": {
+    "name": "Planable",
+    "domain": "planable.io"
+  },
+  "retrieved_at": "2026-08-28",
+  "collection": {
+    "mode": "live-apify-expanded-curated-subset",
+    "discovery": {
+      "actor": "Google Search Scraper",
+      "run_id": "gQ7kOgsk4ARBwZmo7",
+      "status": "SUCCEEDED",
+      "query_count": 12,
+      "max_pages_per_query": 4,
+      "result_page_rows": 48,
+      "distinct_canonical_reddit_post_urls": 117,
+      "cost_usd": 0.051
+    },
+    "source_validation": {
+      "actor": "Reddit Scraper Lite",
+      "run_id": "f2rGffxBoA6UbJh76",
+      "status": "ABORTED",
+      "status_note": "The run was deliberately aborted after the emitted rows were saved. This file is a curated subset of those saved rows, not complete coverage of all discovered URLs.",
+      "discovered_post_urls_submitted": 117,
+      "max_comments_per_post_requested": 40,
+      "saved_rows": 942,
+      "saved_post_rows": 67,
+      "saved_comment_rows": 875,
+      "cost_usd": 3.2428
+    }
+  },
+  "privacy": {
+    "author_handles_omitted": true,
+    "author_available_required": true,
+    "author_identity_redacted": true,
+    "distinct_accepted_authors_verified_at_collection": 6,
+    "note": "Records with missing, deleted, removed, promotional, vendor, or duplicate authors were excluded. Direct Reddit profile endpoints returned HTTP 403, so no profile-derived identity claims are included."
+  },
+  "screening_summary": {
+    "saved_rows": 942,
+    "accepted_questions": 6,
+    "accepted_posts": 5,
+    "accepted_comments": 1,
+    "verified_distinct_accepted_authors": 6,
+    "rejected_rows": 936,
+    "rejection_counts": {
+      "unknown_removed_author_or_content": 88,
+      "no_explicit_planable_relationship_in_row_or_parent": 627,
+      "no_literal_question_in_fetched_source": 155,
+      "vendor_or_marketing_context": 6,
+      "same_author_crosspost_or_duplicate": 6,
+      "editorially_irrelevant_or_ambiguous": 54
+    }
+  },
+  "questions": [
+    {
+      "question": "Currently I'm considering Buffer or Planable since it's the cheapest and they offer free demo too for 7-14 days, any suggestions?",
+      "context": "Currently, we use spreadsheet and Canva for editing images/creating contents, managing the contents' schedule and showing it to the clients.",
+      "source_url": "https://www.reddit.com/r/DigitalMarketing/comments/19edbar/buffer_vs_hootsuite_vs_planable_vs_anything_else/",
+      "source_platform": "reddit",
+      "source_type": "reddit_post",
+      "published_at": "2024-01-24T09:34:05.000Z",
+      "retrieved_at": "2026-08-28T16:16:12.402Z",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "planable_relationship": "The asker explicitly says they are considering Planable while replacing a spreadsheet-based client calendar workflow.",
+      "semantic_clusters": [
+        "alternatives-and-affordability",
+        "pre-purchase-evaluation"
+      ]
+    },
+    {
+      "question": "What platform do you use to get approvals from clients on social media content on a regular basis and automate the postings?",
+      "context": "I am using Planable to create content calendars for social media for my clients and request their approval for each post.",
+      "source_url": "https://www.reddit.com/r/DigitalMarketing/comments/1m7dkv8/what_platform_do_you_use_for_client_approvals_on/",
+      "source_platform": "reddit",
+      "source_type": "reddit_post",
+      "published_at": "2025-07-23T16:15:58.000Z",
+      "retrieved_at": "2026-08-28T16:17:16.008Z",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "planable_relationship": "The asker explicitly reports current Planable usage and evaluates alternatives because the subscription and Grid planner cost are unfriendly.",
+      "semantic_clusters": [
+        "alternatives-and-affordability",
+        "client-approval-workflow"
+      ]
+    },
+    {
+      "question": "Anyone who knows a cheaper alternative that also has Feed, Calendar & Grid views + client approval feature?",
+      "context": "I am looking for a cheaper alternative to Planable. It's $59 per month, per workspace/client, and that seems unnecessary...",
+      "source_url": "https://www.reddit.com/r/SocialMediaMarketing/comments/1ld9v7w/do_you_know_any_cheaper_planable_alternative/",
+      "source_platform": "reddit",
+      "source_type": "reddit_post",
+      "published_at": "2025-06-17T00:51:17.000Z",
+      "retrieved_at": "2026-08-28T16:18:10.510Z",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "planable_relationship": "The asker explicitly seeks a cheaper Planable replacement while preserving named views and client approval.",
+      "semantic_clusters": [
+        "alternatives-and-affordability",
+        "client-approval-workflow"
+      ]
+    },
+    {
+      "question": "any old Crowdfire users have advice in this regard?",
+      "context": "I have been using Crowdfire for social media management, but they officially shut down! Now I am looking for alternatives~ I am thinking about Planable, and a friend recommended Nuelink",
+      "source_url": "https://www.reddit.com/r/Pinterest/comments/1l4ox6a/what_is_the_best_alternative_to_crowdfire/",
+      "source_platform": "reddit",
+      "source_type": "reddit_post",
+      "published_at": "2025-06-06T10:20:00.000Z",
+      "retrieved_at": "2026-08-28T16:21:01.805Z",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "planable_relationship": "The asker explicitly names Planable as a candidate replacement under evaluation.",
+      "semantic_clusters": [
+        "alternatives-and-affordability",
+        "pre-purchase-evaluation"
+      ]
+    },
+    {
+      "question": "Does the MCP server auto-format the copy for each platform or do your social managers still have to completely rewrite the Planable drafts?",
+      "context": "We tried automated drafting from search data before and the output felt way too robotic for Instagram.",
+      "source_url": "https://www.reddit.com/r/AISearchLab/comments/1vrlogr/how_an_mcp_server_seo_setup_turned_our_social/p4gdes9/",
+      "source_platform": "reddit",
+      "source_type": "reddit_comment",
+      "published_at": "2026-08-18T17:15:14.000Z",
+      "retrieved_at": "2026-08-28T16:24:01.319Z",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "planable_relationship": "The commenter explicitly evaluates whether Planable drafts require full manual rewriting in an automated drafting workflow.",
+      "semantic_clusters": [
+        "draft-quality-and-rewriting"
+      ]
+    },
+    {
+      "question": "Now we are wondering if anyone has experience with the analytical part of Planable and if it is worth it?",
+      "context": "within our organization we are planning to subscribe to Planable.",
+      "source_url": "https://www.reddit.com/r/SocialMediaMarketing/comments/1iwxtcy/planable_analytically_is_it_worth_it/",
+      "source_platform": "reddit",
+      "source_type": "reddit_post",
+      "published_at": "2025-02-24T09:03:14.000Z",
+      "retrieved_at": "2026-08-28T16:29:12.100Z",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "planable_relationship": "The asker explicitly describes an intended Planable subscription and asks whether its analytics are worth it.",
+      "semantic_clusters": [
+        "analytics-value",
+        "pre-purchase-evaluation"
+      ]
+    }
+  ],
+  "semantic_clusters": [
+    {
+      "name": "alternatives-and-affordability",
+      "accepted_question_count": 4,
+      "verified_distinct_author_count": 4,
+      "breadth_limit": "The questions share alternative-selection or affordability intent, but ask about different incumbent tools, prices, and required workflows. They are related, not identical questions."
+    },
+    {
+      "name": "pre-purchase-evaluation",
+      "accepted_question_count": 3,
+      "verified_distinct_author_count": 3,
+      "breadth_limit": "The questions concern evaluating Planable before adoption, but cover general tool choice, migration from Crowdfire, and analytics value."
+    },
+    {
+      "name": "client-approval-workflow",
+      "accepted_question_count": 2,
+      "verified_distinct_author_count": 2,
+      "breadth_limit": "Both questions involve client approval, but one asks broadly about an approval platform and the other requires specific views plus approval at a lower price."
+    },
+    {
+      "name": "analytics-value",
+      "accepted_question_count": 1,
+      "verified_distinct_author_count": 1,
+      "breadth_limit": "A single accepted question does not establish repetition."
+    },
+    {
+      "name": "draft-quality-and-rewriting",
+      "accepted_question_count": 1,
+      "verified_distinct_author_count": 1,
+      "breadth_limit": "A single accepted comment does not establish repetition."
+    }
+  ],
+  "limitations": [
+    "The source-validation run was deliberately aborted after 942 rows were saved. Fifty of the 117 discovered post URLs had not emitted a post row, so this is a curated subset rather than complete corpus coverage.",
+    "Search results were used only for discovery. Every accepted question and context excerpt comes from a fetched Reddit post or comment row.",
+    "Semantic clusters represent related intent at varying breadth. Generic alternative-selection questions are not treated as identical questions.",
+    "This corpus contains public-question evidence only and makes no judgment about gaps in Planable's website or product documentation."
+  ]
+}
