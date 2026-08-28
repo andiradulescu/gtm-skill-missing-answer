@@ -69,6 +69,8 @@ test('Planable fixture accepts only fetched Reddit posts discovered through Goog
   assert.equal(collected.schema_version, 1);
   assert.deepEqual(collected.subject, { name: 'Planable', domain: 'planable.io' });
   assert.equal(collected.collection_mode, 'fixture');
+  assert.ok(!('discovered_sources' in collected));
+  assert.equal(collected.discovery_summary.canonical_reddit_urls_found, 2);
   assert.deepEqual(collected.queries, ['planable alternatives -site:planable.io']);
   assert.equal(collected.questions.length, 1);
   assert.equal(collected.questions[0].question, 'What is the best alternative to Planable?');
