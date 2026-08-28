@@ -89,32 +89,23 @@ finding. A preview is never treated as evidence.
 
 ## Current demo
 
-The committed Planable case uses a dated evidence snapshot. This keeps the
-analysis reproducible and preserves the original source URLs and retrieval
-dates. The snapshot is always described as cached evidence, never as a live
-crawl.
+The official demo uses a dated Figma evidence snapshot. Two independent public
+questions ask whether an external client can comment on a prototype without a
+Figma account. Figma's customer-facing agency and UI-design pages promote
+client comments without stating the account requirement, while its official
+help documentation says commenters must be signed in and have view access.
 
-The current input contains seven distinct Reddit questions and six canonically
-fetched G2 questions. It records several broad workflow clusters, including a
-provisional two-person Instagram Story cluster, while stating explicitly that
-related intent is not necessarily a semantically repeated question.
+The committed [`BURIED ANSWER`](demo/output/figma-missing-answer.md) finding
+preserves the exact public questions, checked pages, verified official answer,
+confidence, proposed copy, and limitations. The sibling
+[`local preview`](demo/output/figma-missing-answer.html) renders only the
+proposed insertion, identifies itself as a review-only draft, and makes no
+network requests or live-site changes.
 
-The committed [`insufficient evidence`](demo/output/planable-missing-answer.md)
-artifact is the current result. It rejects broad overlaps that do not meet the
-semantic-repetition rule, classifies the directly documented pricing-model
-question as `REJECT`, and refuses to force either a positive finding or a
-preview.
-
-The exact final seed completed from a clean temporary clone at commit
-`4171e002cc2411d9db96343f5e085241317ecd1e`. Codex v0.150.1 with
-`gpt-5.6-sol` at low reasoning read the four cached Planable inputs, made no
-network calls, exited successfully in 30 seconds, and preserved the committed
-output byte-for-byte. Its SHA-256 is
-`ad94a6f3eb2a8d6a6b11c08adc8f61b037fd185ad5565687e5892641d026b05e`.
 The complete presentation contract and observed run provenance are recorded in
 [`DEMO.md`](DEMO.md) and [`demo/evals.md`](demo/evals.md).
 
-## Portability evidence
+## Abstention evidence
 
 The skill instructions accept one public company URL and define the same
 evidence and abstention rules for another company:
@@ -125,15 +116,11 @@ finding to missing-answer.md. Stop with insufficient evidence if the complete
 evidence chain cannot be verified.
 ```
 
-The recorded Figma intended-case evaluation applies the same evidence contract
-to a second company. It produces one `BURIED ANSWER` finding from independent
-public questions, checked marketing pages, and official help evidence, without
-network access, preview creation, or external mutation. See the
-[`Figma input`](demo/evals/intended/figma.md) and
-[`observed result`](demo/evals/intended/figma-missing-answer.md).
-
-This proves the evidence-analysis path on a second dated input. It does not prove
-the optional preview stage across domains. The `stock.estate` fixture remains a
+The Planable case remains as the negative evaluation. Its dated corpus contains
+real public questions, but no candidate completes the required semantic
+repetition, website-gap, and official-answer chain. The skill therefore returns
+[`insufficient evidence`](demo/evals/insufficient/planable-insufficient-evidence.md)
+instead of forcing a recommendation. The `stock.estate` fixture remains a
 collector-normalization test rather than an end-to-end skill run.
 
 ## Evidence collection
@@ -165,7 +152,7 @@ node --test scripts/*.test.mjs
 | --- | --- |
 | [`.agents/skills/missing-answer/SKILL.md`](.agents/skills/missing-answer/SKILL.md) | The reusable Codex skill and its evidence contract |
 | [`demo/input/`](demo/input/) | Representative input and dated public-data snapshot |
-| [`demo/output/`](demo/output/) | Verified Planable abstention fallback, with no preview |
+| [`demo/output/`](demo/output/) | Figma finding and review-only local preview fallback |
 | [`demo/seed-prompt.md`](demo/seed-prompt.md) | Exact cold-start prompt verified from a clean clone |
 | [`demo/evals.md`](demo/evals.md) | Three observed eval cases plus exact-seed provenance |
 | [`DEMO.md`](DEMO.md) | Completed two-minute presentation run sheet |
@@ -181,8 +168,7 @@ node --test scripts/*.test.mjs
 - Cached evidence becomes stale and must retain its retrieval date.
 - Missing Answer deliberately prefers one strong finding over a broad list of
   weak suggestions.
-- The Figma eval proves the second-company evidence-analysis path, not the
-  optional preview stage.
+- The Planable eval proves abstention behavior when the evidence chain fails.
 - Every proposed change remains a draft until a human reviews it.
 
 ## License

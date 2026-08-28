@@ -10,22 +10,22 @@
 
 **The job this skill does:** Given one public company URL, Missing Answer finds one repeated public question the website does not clearly answer, or abstains when the evidence does not support a finding.
 
-**Boundary — what it never does:** It does not guess a website gap, use personal data, fetch or refresh the cached Planable evidence, or change a live site.
+**Boundary — what it never does:** It does not guess a website gap, use personal data, refresh the supplied snapshot, or change a live site.
 
 ## Run this — 60 seconds
 
 1. Open Codex at the repository root.
 2. Paste [`demo/seed-prompt.md`](demo/seed-prompt.md).
-3. Watch for [`demo/output/planable-missing-answer.md`](demo/output/planable-missing-answer.md) to be written with an `insufficient evidence` decision, source URLs, and limitations. That abstention is the correct result for this cached input.
-4. If the run has not finished after 60 seconds, open the committed fallback: [`demo/output/planable-missing-answer.md`](demo/output/planable-missing-answer.md).
+3. Watch for [`demo/output/figma-missing-answer.md`](demo/output/figma-missing-answer.md) to show one `BURIED ANSWER` finding backed by two independent questions and Figma's official documentation.
+4. Open the review-only local preview at [`demo/output/figma-missing-answer.html`](demo/output/figma-missing-answer.html). If the run has not finished after 60 seconds, use the two committed fallback artifacts.
 
 ## Show this — 25 seconds
 
-**Result:** Planable's cached evidence does not support one qualifying `BURIED ANSWER` or `MISSING ANSWER` finding. The content lead therefore does not draft a page change from this snapshot.
+**Result:** Two independent evaluators ask whether clients can comment on Figma prototypes without an account. Figma's agency page promotes client comments but leaves the sign-in requirement in help documentation, so the skill proposes one precise clarification.
 
-**Evidence:** The output names the excluded question clusters, lists cached public and official source URLs, gives the 2026-08-28 retrieval date, and states the unverified limits.
+**Evidence:** The Markdown output preserves both verbatim questions, their public source URLs, the checked customer-facing pages, the official help answer, the 2026-08-28 retrieval date, confidence, and limitations.
 
-**Fallback output was produced:** The exact seed ran on 2026-08-28 from a clean clone of commit `4171e002cc2411d9db96343f5e085241317ecd1e` with Codex v0.150.1, `gpt-5.6-sol`, and low reasoning. It used the four committed Planable inputs, made no network calls, and preserved the fallback byte-for-byte.
+**Fallback output:** The committed Markdown finding and HTML preview use only the dated Figma snapshot. The preview is visibly labeled as a local review-only draft and makes no network requests.
 
 ## Evals — 10 seconds
 
@@ -39,4 +39,4 @@
 
 **Reusable on:** One public company website URL with public question evidence and official source pages.
 
-**Material limitation:** This Planable run uses a fixed snapshot retrieved on 2026-08-28. It contains no qualifying repeated, semantically equivalent question with a verified answer chain, so the skill must abstain.
+**Material limitation:** This finding uses a fixed snapshot retrieved on 2026-08-28. It does not establish Figma's future roadmap or the onboarding flow a newly invited commenter sees.

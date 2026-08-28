@@ -5,7 +5,7 @@ Classification: BURIED ANSWER
 **Normalized question:** Can an external client comment on a Figma prototype
 without creating or signing in to a Figma account?
 
-**Independent-source count:** 2
+**Independent-source count:** 2 distinct public URLs
 
 **Source 1, evaluator**
 
