@@ -1,66 +1,158 @@
-# GTM Skillathon — participant template
+# Missing Answer
 
-Build a reusable agent skill that solves one go-to-market problem with real-world web data, in 2.5 hours, and submit it so the jury can run it from a single laptop.
+**Turn repeated prospect questions into one evidence-backed website improvement.**
 
-This file is written for agents first. If you are a participant, paste the prompt in [Start here](#start-here) into your agent and let it guide you.
+A product website can explain every feature and still leave an important buying
+question unanswered. Missing Answer starts outside the company website. It finds
+questions that real people ask in public, checks whether the site answers them,
+verifies the answer from official sources, and proposes the smallest useful page
+change.
 
-- Event: [Build with Codex: GTM Skillathon](https://luma.com/82q9aclg), 28 August 2026, Builders House, București
-- Rules, timeline, and judging: [`RULES.md`](RULES.md) — canonical
-- Build contract for your agent: [`AGENTS.md`](AGENTS.md)
-- Submissions and live board: <https://github.com/formidable-oss/gtm-skillathon-submissions>
+The result is not a generic SEO audit or a list of AI-generated content ideas. It
+is one reviewable recommendation with a traceable evidence chain:
+
+> public questions → independent repetition → website gap → verified answer →
+> proposed page change → local preview
+
+## The problem
+
+Marketing teams usually improve a website from the inside out: positioning,
+campaign priorities, search volume, and competitor pages. Meanwhile, prospects
+ask concrete adoption, pricing, workflow, integration, security, and comparison
+questions in public discussions.
+
+When the same question appears independently more than once and the company site
+does not resolve it, that is a useful content signal. Missing Answer turns that
+signal into a specific draft that a content lead can inspect, verify, and choose
+whether to ship.
+
+## What the skill delivers
+
+For one public company website, `$missing-answer` produces exactly one strongest
+finding:
+
+1. **Potential customers are asking this**: the normalized question, the
+   independent source count, and short redacted excerpts with URLs and retrieval
+   dates.
+2. **The site does not answer it**: the official pages inspected and the exact
+   ambiguity that remains.
+3. **Here is the verified missing answer**: a page-safe answer supported by
+   official documentation, with confidence and citations.
+4. **Proposed page change**: one target page, one insertion point, and concise
+   draft copy.
+5. **Preview instructions**: a review-only local rendering of the smallest
+   credible edit in the site's existing design language.
+6. **Limitations**: snapshot age, inaccessible evidence, and anything the run
+   could not verify.
+
+If that full chain cannot be established, the skill returns `insufficient
+evidence` instead of filling the gaps with plausible-sounding claims.
 
 ## How it works
 
-| Time (Bucharest) | What happens |
-| --- | --- |
-| 17:00 | Doors, check-in |
-| 17:30 | Intro, how the Skillathon works, live Codex workflow demo |
-| 18:00 | Build starts. Submissions open. |
-| **20:30** | **Hard cutoff. Submissions close.** Demos start immediately, in random order. |
-| 21:45 | Formidable Builders launch party |
+### 1. Start with observed questions
 
-- Teams of 1–2 people. Build with any agent (Codex, Claude Code, Cursor, anything). The jury runs your submission in the **Codex desktop app**, so the judged path must work in Codex.
-- You submit a **public GitHub repository** created from this template plus a **commit SHA**. The organizer clones that exact commit, opens it in Codex, pastes your seed prompt, and presents it for you in 2 minutes.
-- Submissions are GitHub issues in the submissions repository. Anything filed at or after 20:30:00 is rejected automatically.
-- **Your skill stays public.** After the event, submitted skills are forked into the Formidable Builders GitHub organization (<https://github.com/formidable-oss>) and remain publicly available under the MIT licence. Do not submit anything you are not willing to publish.
+The skill looks for concrete buying and adoption questions written by potential
+customers in public discussions. Company-authored FAQs, generated questions,
+reposts, duplicate authors, and mere topic mentions do not count as demand
+evidence.
 
-## Start here
+### 2. Require independent repetition
 
-1. On GitHub, select **Use this template → Create a new repository**. Make it **public**.
-2. Get it onto your laptop and open it in your agent. If you know git: `git clone <your-repo-url>`, then open the folder. If you do not: open your agent in any folder, paste your repository URL, and ask it to clone the repository and set up git for you (it needs `git`, a name and email for commits, and `gh auth login` so pushing works without passwords).
-3. Paste this prompt:
+A candidate needs at least two semantically equivalent questions from separate
+people at distinct source URLs. The collector validates source pages, removes
+duplicate-author posts, strips author identity, and redacts handles and email
+addresses before evidence reaches the skill.
+
+### 3. Test the website, not the product
+
+The skill checks whether relevant official pages give a clear, direct answer. A
+`Missing` verdict means only that the inspected website pages do not answer the
+question. It never means the product lacks the capability.
+
+### 4. Verify before drafting
+
+Any proposed answer must be supported by official documentation, help-center
+content, product pages, or announcements. Third-party commentary and absence of
+evidence are never converted into product claims.
+
+### 5. Stop at a reviewable draft
+
+Missing Answer recommends one small edit and can create a local HTML preview. It
+does not publish content, contact anyone, or modify the live website.
+
+## Demo
+
+The representative demo analyzes Planable from a committed, dated evidence
+snapshot. This keeps the demo path reproducible and free of credentials while
+preserving the original source URLs and retrieval dates. The snapshot is always
+described as cached evidence, never as a live crawl.
+
+From the repository root in Codex, paste the contents of
+[`demo/seed-prompt.md`](demo/seed-prompt.md). The prompt invokes
+`$missing-answer`, names the representative input, and requests the Markdown
+finding plus its sibling local HTML preview.
+
+If the live run stalls, the genuine saved result under
+[`demo/output/`](demo/output/) is the fallback. The presentation sequence and
+the three observed evaluation cases are recorded in [`DEMO.md`](DEMO.md) and
+[`demo/evals.md`](demo/evals.md).
+
+## Using it on another company
+
+Give the skill exactly one public company URL and a destination for the result:
 
 ```text
-Read AGENTS.md, RULES.md, and .agents/skills/skillathon-guide/SKILL.md, then follow that skill: explain how the GTM Skillathon works and how I will be judged, then help me choose one track, one user, one narrow GTM job, one representative input, one success condition, and one boundary. Keep it small enough to build, test, and submit in two and a half hours.
+$missing-answer Analyze https://example.com and write the strongest supported
+finding to missing-answer.md. Stop with insufficient evidence if the complete
+evidence chain cannot be verified.
 ```
 
-4. Build your skill in `.agents/skills/<skill-name>/SKILL.md`. Test it on the representative input. Record what actually happened.
-5. Fill in `submission.json`, `DEMO.md`, and everything under `demo/`.
-6. Ask your agent to run `$skillathon-submit` (path: `.agents/skills/skillathon-submit/SKILL.md`). It runs the same structure and safety checks the submission system runs, commits, pushes, and files the submission. Submit early; you can resubmit until 20:30 and the latest accepted submission counts.
+For companies other than the committed demo target, the run depends on public
+pages being accessible at the time of analysis. No login-only sources, personal
+data, or authenticated services are required by the skill.
 
-## What you must deliver
+## Evidence collection
 
-Everything the jury needs is inside your repository at the submitted commit:
+[`scripts/collect-public-questions.mjs`](scripts/collect-public-questions.mjs)
+is the preparation-time collector used to create a privacy-reduced question
+snapshot. It discovers Reddit discussions through Google search results,
+validates the questions at their Reddit source pages, enforces one accepted post
+per verifiable author, and writes normalized evidence atomically.
 
-| Artifact | Path | Purpose |
-| --- | --- | --- |
-| Entry skill | `.agents/skills/<skill-name>/SKILL.md` | The one skill the seed prompt invokes. Other skills may support it. |
-| Seed prompt | `demo/seed-prompt.md` | The exact prompt the organizer pastes into Codex. Must invoke `$<skill-name>` and name the input path. |
-| Representative input | `demo/input/<file-or-folder>` | The smallest input that shows the job. Public data only, with source URL and retrieval date. |
-| Fallback output | `demo/output/<file-or-folder>` | A genuine result your skill produced during the event. Shown if the live run stalls. |
-| Evaluations | `demo/evals.md` | Three cases — intended, insufficient evidence, failure/exclusion — with observed results. |
-| Run sheet | `DEMO.md` | What the organizer says and shows during your 2 minutes. |
-| Manifest | `submission.json` | Paths to all of the above, team, track, problem. |
+The collector can run against fixtures without credentials. Live collection
+uses Apify and requires `APIFY_TOKEN`; it is not part of the credential-free
+demo path.
 
-No credentials are available on the jury laptop. If your skill calls an authenticated service, it must degrade gracefully and the fallback output must carry the demo.
+Run its tests with:
 
-## Organizer-provided skills
+```sh
+node --test scripts/collect-public-questions.test.mjs
+```
 
-Two skills ship with this template and are ignored by judging. Do not list them in `submission.json`.
+## Repository map
 
-- `$skillathon-guide` — explains the event, the rules, and the judging; helps scope the job; answers questions.
-- `$skillathon-submit` — validates the repository and files the submission.
+| Path | Purpose |
+| --- | --- |
+| [`.agents/skills/missing-answer/SKILL.md`](.agents/skills/missing-answer/SKILL.md) | The reusable Codex skill and its evidence contract |
+| [`demo/input/`](demo/input/) | Representative input and dated public-data snapshot |
+| [`demo/output/`](demo/output/) | Genuine fallback result and local preview |
+| [`demo/seed-prompt.md`](demo/seed-prompt.md) | Exact cold-start prompt for the demo |
+| [`demo/evals.md`](demo/evals.md) | Intended, insufficient-evidence, and safety evaluations |
+| [`DEMO.md`](DEMO.md) | Two-minute presentation run sheet |
+| [`scripts/collect-public-questions.mjs`](scripts/collect-public-questions.mjs) | Bounded public-question collection and privacy reduction |
 
-## Licence
+## Boundaries and limitations
 
-MIT. Keep `LICENSE` as is. By submitting, you agree that your repository is forked into the Formidable Builders GitHub organization and stays public there under this licence.
+- Public repetition is a content signal, not proof of market prevalence,
+  conversion impact, or revenue loss.
+- Results are limited to accessible sources and the official pages actually
+  inspected.
+- Cached evidence becomes stale and must retain its retrieval date.
+- Missing Answer deliberately prefers one strong finding over a broad list of
+  weak suggestions.
+- Every proposed change remains a draft until a human reviews it.
+
+## License
+
+[MIT](LICENSE)
