@@ -19,22 +19,41 @@ async function runFixture({ company, domain, raw }) {
   return { result, output };
 }
 
-test('Planable fixture writes normalized, sanitized, deduplicated questions and excludes first-party domains', async () => {
+test('Planable fixture accepts only fetched Reddit posts discovered through Google', async () => {
   const { result, output } = await runFixture({
     company: 'Planable',
     domain: 'planable.io',
-    raw: [{
-      searchQuery: { term: 'planable alternatives -site:planable.io' },
-      organicResults: [
-        { title: 'What is the best Planable alternative?', url: 'https://example.com/alternatives', description: 'Ask sam@example.com or @socialexpert for details.' },
-        { title: 'What is the best Planable alternative?', link: 'https://another.example/review', snippet: 'Duplicate result.' },
-        { title: 'How does Planable work?', url: 'https://blog.planable.io/how-it-works', description: 'First-party result.' },
-        { title: 'Planable pricing overview', url: 'https://example.com/pricing', description: 'Not an explicit question.' },
+    raw: {
+      discovery: [{
+        searchQuery: { term: 'planable alternatives -site:planable.io' },
+        organicResults: [
+          { title: 'What is the best Planable alternative?', url: 'https://example.com/alternatives', description: 'SERP-only question.' },
+          { title: 'Planable discussion', url: 'https://www.reddit.com/r/socialmedia/comments/abc123/planable_discussion/' },
+          { title: 'How does Planable work?', url: 'https://blog.planable.io/how-it-works' },
+        ],
+        peopleAlsoAsk: [
+          { question: 'Does Planable have a free plan?', link: 'https://reviews.example/free-plan' },
+        ],
+      }],
+      reddit: [
+        {
+          dataType: 'post',
+          url: 'https://www.reddit.com/r/socialmedia/comments/abc123/planable_discussion/',
+          title: 'What is the best alternative to Planable?',
+          body: 'Ask sam@example.com or @socialexpert for details. The rest is intentionally short.',
+          createdAt: '2026-08-20T12:00:00.000Z',
+          username: 'private_author',
+          score: 42,
+        },
+        {
+          dataType: 'post',
+          url: 'https://www.reddit.com/r/socialmedia/comments/abc123/planable_discussion/',
+          title: 'What is the best alternative to Planable?',
+          body: 'Duplicate actor row.',
+          createdAt: '2026-08-20T12:00:00.000Z',
+        },
       ],
-      peopleAlsoAsk: [
-        { question: 'Does Planable have a free plan?', link: 'https://reviews.example/free-plan', snippet: 'Independent answer.' },
-      ],
-    }],
+    },
   });
 
   assert.equal(result.status, 0, result.stderr);
@@ -43,32 +62,39 @@ test('Planable fixture writes normalized, sanitized, deduplicated questions and 
   assert.deepEqual(collected.subject, { name: 'Planable', domain: 'planable.io' });
   assert.equal(collected.collection_mode, 'fixture');
   assert.deepEqual(collected.queries, ['planable alternatives -site:planable.io']);
-  assert.deepEqual(
-    collected.questions.map(({ question, source_type, source_domain }) => ({ question, source_type, source_domain })),
-    [
-      { question: 'What is the best Planable alternative?', source_type: 'organic_result', source_domain: 'example.com' },
-      { question: 'Does Planable have a free plan?', source_type: 'people_also_ask', source_domain: 'reviews.example' },
-    ],
-  );
-  assert.equal(collected.questions[0].context, 'Ask [redacted-email] or [redacted-handle] for details.');
+  assert.equal(collected.questions.length, 1);
+  assert.equal(collected.questions[0].question, 'What is the best alternative to Planable?');
+  assert.equal(collected.questions[0].source_platform, 'reddit');
+  assert.equal(collected.questions[0].validation, 'fetched-source');
+  assert.equal(collected.questions[0].created_at, '2026-08-20T12:00:00.000Z');
+  assert.equal(collected.questions[0].excerpt, 'Ask [redacted-email] or [redacted-handle] for details. The rest is intentionally short.');
   assert.ok(collected.retrieved_at);
   assert.ok(collected.questions.every((question) => question.retrieved_at === collected.retrieved_at));
+  assert.ok(!collected.questions.some((item) => item.question === 'What is the best Planable alternative?'));
+  assert.ok(!collected.questions.some((item) => item.question === 'Does Planable have a free plan?'));
   assert.ok(!JSON.stringify(collected).includes('sam@example.com'));
   assert.ok(!JSON.stringify(collected).includes('@socialexpert'));
+  assert.ok(!JSON.stringify(collected).includes('private_author'));
+  assert.ok(!JSON.stringify(collected).includes('42'));
 });
 
 test('stock.estate fixture excludes the apex domain and subdomains after URL parsing', async () => {
   const { result, output } = await runFixture({
     company: 'Stock Estate',
     domain: 'stock.estate',
-    raw: [{
-      searchQuery: { term: 'Stock Estate reviews -site:stock.estate' },
-      organicResults: [
-        { title: 'Is Stock Estate trustworthy?', url: 'https://stock.estate/reviews' },
-        { title: 'How does Stock Estate work?', url: 'https://help.stock.estate/guide' },
-        { title: 'What are Stock Estate fees?', url: 'https://www.reddit.com/r/investing/comments/example' },
+    raw: {
+      discovery: [{
+        searchQuery: { term: 'Stock Estate reviews -site:stock.estate' },
+        organicResults: [
+          { title: 'Is Stock Estate trustworthy?', url: 'https://stock.estate/reviews' },
+          { title: 'How does Stock Estate work?', url: 'https://help.stock.estate/guide' },
+          { title: 'Stock Estate discussion', url: 'https://www.reddit.com/r/investing/comments/example/stock_estate/' },
+        ],
+      }],
+      reddit: [
+        { dataType: 'post', url: 'https://www.reddit.com/r/investing/comments/example/stock_estate/', title: 'What are Stock Estate fees?', body: 'I cannot find a clear fee table.', createdAt: '2026-08-21T12:00:00Z' },
       ],
-    }],
+    },
   });
 
   assert.equal(result.status, 0, result.stderr);
