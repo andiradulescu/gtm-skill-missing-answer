@@ -210,7 +210,10 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
     seen.add(key);
     if (rawAuthor) seenAuthors.add(rawAuthor);
     if (rawAuthor) rawAuthors.add(rawAuthor);
-    const excerpt = sanitize(body.replace(/\s+/g, ' ').trim()).slice(0, 280);
+    const excerpt = sanitize(body.replace(/\s+/g, ' ').trim())
+      .replace(/\s+submitted by\s+\[redacted-author\].*$/i, '')
+      .trim()
+      .slice(0, 280);
     questions.push({
       question: sanitize(question),
       excerpt,
