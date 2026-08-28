@@ -1,44 +1,42 @@
 # Run sheet
 
-The organizer presents this repository for you, in 2 minutes, without having seen it before. Write every line for them. Replace every `TODO`. Keep it to one screen.
-
 ## Say this — 20 seconds
 
-**Team:** TODO
+**Team:** Andrei Radulescu
 
-**Track:** TODO
+**Track:** AI search optimization
 
-**Who has the problem:** TODO one named user role at one kind of company
+**Who has the problem:** A B2B SaaS content lead deciding which buyer question a company website should answer next.
 
-**The job this skill does:** TODO one sentence
+**The job this skill does:** Given one public company URL, Missing Answer finds one repeated public question the website does not clearly answer, or abstains when the evidence does not support a finding.
 
-**Boundary — what it never does:** TODO
+**Boundary — what it never does:** It does not guess a website gap, use personal data, fetch or refresh the cached Planable evidence, or change a live site.
 
 ## Run this — 60 seconds
 
-1. Codex is open at the repository root.
+1. Open Codex at the repository root.
 2. Paste [`demo/seed-prompt.md`](demo/seed-prompt.md).
-3. Watch for: TODO the one visible thing that proves it worked (a file written, a table printed, a decision with sources)
-4. If nothing visible after 60 seconds, open the fallback: [`demo/output/TODO`](demo/output/)
+3. Watch for [`demo/output/planable-missing-answer.md`](demo/output/planable-missing-answer.md) to be written with an `insufficient evidence` decision, source URLs, and limitations. That abstention is the correct result for this cached input.
+4. If the run has not finished after 60 seconds, open the committed fallback: [`demo/output/planable-missing-answer.md`](demo/output/planable-missing-answer.md).
 
 ## Show this — 25 seconds
 
-**Result:** TODO what the output is and what a user does with it
+**Result:** Planable's cached evidence does not support one qualifying `BURIED ANSWER` or `MISSING ANSWER` finding. The content lead therefore does not draft a page change from this snapshot.
 
-**Evidence:** TODO where the sources, retrieval dates, and confidence are visible in the output
+**Evidence:** The output names the excluded question clusters, lists cached public and official source URLs, gives the 2026-08-28 retrieval date, and states the unverified limits.
 
-**Fallback output was produced:** TODO date, time, and how
+**Fallback output was produced:** 2026-08-28 from the four committed Planable cached inputs in a credential-free run. It did not browse, refresh, or recrawl sources.
 
 ## Evals — 10 seconds
 
 | Case | Result | Where |
 | --- | --- | --- |
-| Intended | TODO pass/fail in one clause | [`demo/evals.md`](demo/evals.md) |
-| Insufficient evidence | TODO | [`demo/evals.md`](demo/evals.md) |
-| Failure / exclusion | TODO | [`demo/evals.md`](demo/evals.md) |
+| Intended | Read the recorded observed result. | [`demo/evals.md`](demo/evals.md) |
+| Insufficient evidence | Read the recorded observed result. | [`demo/evals.md`](demo/evals.md) |
+| Failure / exclusion | Read the recorded observed result. | [`demo/evals.md`](demo/evals.md) |
 
 ## Close — 5 seconds
 
-**Reusable on:** TODO what other inputs of the same kind this works on unchanged
+**Reusable on:** One public company website URL with public question evidence and official source pages.
 
-**Material limitation:** TODO the honest one
+**Material limitation:** This Planable run uses a fixed snapshot retrieved on 2026-08-28. It contains no qualifying repeated, semantically equivalent question with a verified answer chain, so the skill must abstain.

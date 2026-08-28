@@ -1,1 +1,1 @@
-$TODO-skill-name Use the input at demo/input/TODO-file and produce TODO the observable result named in DEMO.md.
+Use $missing-answer with the cached Planable evidence at `demo/input/planable.md`. Write the evidence-backed decision to `demo/output/planable-missing-answer.md`; if the required evidence chain is incomplete, abstain with `insufficient evidence` rather than forcing a finding.
