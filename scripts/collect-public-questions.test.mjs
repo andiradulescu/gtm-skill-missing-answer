@@ -105,6 +105,47 @@ test('stock.estate fixture excludes the apex domain and subdomains after URL par
   assert.equal(collected.questions[0].source_domain, 'www.reddit.com');
 });
 
+test('redacts Reddit attribution and excludes crossposts from the same author', async () => {
+  const { result, output } = await runFixture({
+    company: 'Planable',
+    domain: 'planable.io',
+    raw: {
+      discovery: [{
+        searchQuery: { term: 'site:reddit.com Planable -site:planable.io' },
+        organicResults: [
+          { title: 'First post', url: 'https://www.reddit.com/r/one/comments/first/planable_question/' },
+          { title: 'Crosspost', url: 'https://www.reddit.com/r/two/comments/second/planable_question/' },
+        ],
+      }],
+      reddit: [
+        {
+          dataType: 'post',
+          url: 'https://www.reddit.com/r/one/comments/first/planable_question/',
+          title: 'Do you know a cheaper Planable alternative?',
+          body: 'Anyone know a cheaper option? &amp; why? submitted by /u/real_person',
+          username: 'real_person',
+        },
+        {
+          dataType: 'post',
+          url: 'https://www.reddit.com/r/two/comments/second/planable_question/',
+          title: '[Crosspost] Is there a cheaper Planable alternative?',
+          body: 'Anyone know a cheaper option? submitted by u/real_person',
+          username: 'real_person',
+        },
+      ],
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const collected = JSON.parse(await readFile(output, 'utf8'));
+  assert.equal(collected.questions.length, 1);
+  assert.equal(collected.questions[0].excerpt, 'Anyone know a cheaper option? & why? submitted by [redacted-author]');
+  assert.equal(collected.questions[0].author_available, true);
+  assert.equal(collected.independence_check.duplicate_author_posts_excluded, 1);
+  assert.ok(!JSON.stringify(collected).includes('real_person'));
+  assert.ok(!JSON.stringify(collected).includes('/u/'));
+});
+
 test('live mode fails meaningfully when APIFY_TOKEN is unavailable', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'public-question-collector-'));
   const output = path.join(directory, 'questions.json');
