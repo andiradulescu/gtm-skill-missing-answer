@@ -28,7 +28,7 @@ If no candidate has two independently verifiable public questions, a demonstrabl
 
 Write the result to the path requested by the prompt, or `demo/output/planable-missing-answer.md` for the demo. Produce exactly one strongest finding, using these sections in this order:
 
-1. `These customers asked this`: state the normalized question and exact independent-source count; include at least two short verbatim excerpts, each labeled `Source 1`, `Source 2`, and so on, with source URL and retrieval date, but no person names, handles, or other personal data.
+1. `Multiple real users or prospects are asking this`: state the normalized question and exact independent-source count; include at least two short verbatim excerpts, each labeled `Source 1`, `Source 2`, and so on, with source URL, retrieval date, and non-personal context proving explicit product usage or evaluation intent, but no person names, handles, or other personal data. Label each source as a user/customer only when usage is explicit, as a prospect/evaluator only when evaluation intent is explicit, or otherwise as an independent source.
 2. `The site does not answer it`: name the official pages checked, their URLs and retrieval dates, and explain precisely why they do not resolve the question.
 3. `Here is the verified missing answer`: state only the answer supported by official evidence; cite every official source URL and retrieval date; give confidence as high, medium, or low with one sentence of reasoning.
 4. `Proposed page change`: name one exact page and insertion point, provide concise draft copy, and explain how it resolves the evidenced uncertainty.
@@ -38,6 +38,7 @@ Write the result to the path requested by the prompt, or `demo/output/planable-m
 ## Rules
 
 - Never invent or paraphrase a quote, source, retrieval date, customer identity, website gap, official answer, confidence basis, or preview result.
+- Never infer customer or prospect status from public authorship alone.
 - Never include personal data. Refer to evidence as numbered sources, not identifiable people.
 - Never send, publish, deploy, submit, contact anyone, modify a live website, or describe the local preview as a live-site change.
 - Never claim conversion impact or say that the company implemented or approved the proposed change.
