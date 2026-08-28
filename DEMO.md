@@ -25,7 +25,7 @@
 
 **Evidence:** The output names the excluded question clusters, lists cached public and official source URLs, gives the 2026-08-28 retrieval date, and states the unverified limits.
 
-**Fallback output was produced:** 2026-08-28 from the four committed Planable cached inputs in a credential-free run. It did not browse, refresh, or recrawl sources.
+**Fallback output was produced:** The exact seed ran on 2026-08-28 from a clean clone of commit `4171e002cc2411d9db96343f5e085241317ecd1e` with Codex v0.150.1, `gpt-5.6-sol`, and low reasoning. It used the four committed Planable inputs, made no network calls, and preserved the fallback byte-for-byte.
 
 ## Evals — 10 seconds
 
