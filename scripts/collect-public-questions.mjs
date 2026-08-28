@@ -90,8 +90,12 @@ async function runActor(actor, token, input) {
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!response.ok) throw new Error(`${actor} API request failed with HTTP ${response.status}`);
-  try { return requireArray(await response.json(), `${actor} response`); }
+  const responseBody = await response.text();
+  if (!response.ok) {
+    const detail = responseBody.replace(/\s+/g, ' ').trim().slice(0, 500);
+    throw new Error(`${actor} API request failed with HTTP ${response.status}${detail ? `: ${detail}` : ''}`);
+  }
+  try { return requireArray(JSON.parse(responseBody), `${actor} response`); }
   catch (error) {
     if (error instanceof SyntaxError) throw new Error(`${actor} API returned invalid JSON: ${error.message}`);
     throw error;
