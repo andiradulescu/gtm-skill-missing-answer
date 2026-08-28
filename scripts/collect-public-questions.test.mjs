@@ -29,6 +29,7 @@ test('Planable fixture accepts only fetched Reddit posts discovered through Goog
         organicResults: [
           { title: 'What is the best Planable alternative?', url: 'https://example.com/alternatives', description: 'SERP-only question.' },
           { title: 'Planable discussion', url: 'https://www.reddit.com/r/socialmedia/comments/abc123/planable_discussion/' },
+          { title: 'Unknown author', url: 'https://www.reddit.com/r/socialmedia/comments/unknown/planable_question/' },
           { title: 'How does Planable work?', url: 'https://blog.planable.io/how-it-works' },
         ],
         peopleAlsoAsk: [
@@ -51,6 +52,13 @@ test('Planable fixture accepts only fetched Reddit posts discovered through Goog
           title: 'What is the best alternative to Planable?',
           body: 'Duplicate actor row.',
           createdAt: '2026-08-20T12:00:00.000Z',
+        },
+        {
+          dataType: 'post',
+          url: 'https://www.reddit.com/r/socialmedia/comments/unknown/planable_question/',
+          title: 'Does Planable support this workflow?',
+          body: 'The source actor did not return a verifiable author.',
+          createdAt: '2026-08-21T12:00:00.000Z',
         },
       ],
     },
@@ -79,6 +87,7 @@ test('Planable fixture accepts only fetched Reddit posts discovered through Goog
   assert.equal(collected.independence_check.distinct_authors_verified_at_collection, false);
   assert.equal(collected.independence_check.accepted_posts_with_author, 1);
   assert.equal(collected.independence_check.duplicate_author_posts_excluded, 0);
+  assert.equal(collected.independence_check.unverifiable_author_posts_excluded, 1);
 });
 
 test('stock.estate fixture excludes the apex domain and subdomains after URL parsing', async () => {
@@ -95,7 +104,7 @@ test('stock.estate fixture excludes the apex domain and subdomains after URL par
         ],
       }],
       reddit: [
-        { dataType: 'post', url: 'https://www.reddit.com/r/investing/comments/example/stock_estate/', title: 'What are Stock Estate fees?', body: 'I cannot find a clear fee table.', createdAt: '2026-08-21T12:00:00Z' },
+        { dataType: 'post', url: 'https://www.reddit.com/r/investing/comments/example/stock_estate/', title: 'What are Stock Estate fees?', body: 'I cannot find a clear fee table.', createdAt: '2026-08-21T12:00:00Z', username: 'verified_source' },
       ],
     },
   });
