@@ -3,16 +3,17 @@
 - Target: <https://planable.io/>
 - Retrieved: 2026-08-28
 - Public-question snapshot: [`planable-public-questions.json`](planable-public-questions.json)
+- G2 question snapshot: [`planable-g2-public-questions.json`](planable-g2-public-questions.json)
 
 This is a dated, cached input for the Planable demo. It is not a live crawl. The
 linked JSON records two independently authored Reddit posts whose authors were
-verified during collection and then redacted. A targeted G2 pass added one
-separately authored question below. All three questions differ semantically, so
-their presence does not establish a repeated two-person question cluster.
+verified during collection and then redacted. The G2 snapshot records six more
+canonically fetched questions from six distinct authors, with the same identity
+redaction boundary.
 
 ## Evidence contract
 
-- Use the linked JSON and the supplemental G2 record below only for
+- Use the two linked JSON snapshots only for
   public-question evidence. Preserve their source URLs, timestamps, redaction,
   and independence limits.
 - Use only the first-party pages below for Planable feature and answer evidence.
@@ -24,27 +25,18 @@ their presence does not establish a repeated two-person question cluster.
   conflict as an unresolved limitation unless another cited page resolves it.
 - Do not describe this snapshot as current beyond its retrieval date.
 
-## Supplemental G2 question
+## G2 question evidence
 
-Source: <https://www.g2.com/discussions/when-we-will-have-the-stories-more-interactive>
+The linked G2 snapshot contains six exact third-party questions accepted only
+after their canonical G2 pages were fetched. Search titles and snippets were
+discovery leads only. Author identities were checked for distinctness during
+collection and then omitted.
 
-- Source date: 2022-04-28
-- Retrieved: 2026-08-28
-- Platform: G2 Discussions
-- Independence: one distinct third-party author was verified during collection;
-  identity details were omitted
-- Relationship evidence: the product-specific discussion requests additional
-  Instagram Story behavior in Planable, but does not prove account or paid-plan
-  status
-
-Verbatim question:
-
-> When we will have the stories more interactive?
-
-Non-personal context: the asker wants Story support for hashtags and links.
-Nine other G2 discussion URLs found during discovery could not be fetched from
-their canonical pages, so their indexed titles were rejected. This single G2
-question cannot establish a repeated semantic cluster.
+Two distinct askers form a provisional Instagram Story workflow cluster. One
+asks about automatic Story publishing and the other about Story interactivity.
+This joins related workflow needs, but the wording and requested capabilities
+are not identical. The other four G2 questions do not form a repeated
+two-person semantic cluster in this snapshot.
 
 ## Pricing and the per-workspace model
 
@@ -211,8 +203,9 @@ for a recipient who has never had a Planable account remains unknown.
 
 ## Snapshot limitations
 
-- The question evidence contains three distinct questions across Reddit and G2,
-  not a demonstrated repeated cluster.
+- The question evidence contains two Reddit questions and six G2 questions.
+  Only the provisional two-person Story workflow cluster repeats at a broader
+  semantic level; automatic publishing and interactivity are not identical asks.
 - The first-party pages were inspected as public web pages on 2026-08-28. Their
   content, prices, and product behavior may change.
 - No authenticated Planable workspace, billing checkout, approver invitation,

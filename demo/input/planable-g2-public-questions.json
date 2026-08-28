@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "subject": {
+    "name": "Planable",
+    "domain": "planable.io"
+  },
+  "retrieved_at": "2026-08-28T16:16:14Z",
+  "collection_mode": "live-apify-canonical-g2",
+  "collection_provenance": {
+    "discovery": {
+      "actor_id": "apify~google-search-scraper",
+      "run_ids": [
+        "emuSZozB7POKUzpXj",
+        "yTUjTyjugWiVmXZhI"
+      ],
+      "role": "Discovery only; search titles and snippets were never accepted as question evidence."
+    },
+    "validation": {
+      "actor_id": "apify~website-content-crawler",
+      "run_ids": [
+        "kVecBHjELObnPYbMt",
+        "gA1XZ7wY7sLK5nF2K",
+        "IedEfHcBxomkfbERp",
+        "PNCChdlESdv7bUP4P",
+        "GTWhsK4xq5mii2iwa",
+        "0IKlTtl68CZjRXyBh",
+        "LHSu3xc5f3G3qHWVc",
+        "O4dffEbsbO7eVajez",
+        "Qa2o6mdekGHzTWmPd",
+        "u2ZaFigb22TuGgB5w"
+      ],
+      "role": "Canonical G2 page fetch and rendered-source validation."
+    }
+  },
+  "independence_check": {
+    "distinct_authors_verified_at_collection": true,
+    "accepted_questions_with_author": 6,
+    "duplicate_authors_excluded": 0,
+    "author_identity_persisted": false
+  },
+  "questions": [
+    {
+      "question": "Can you base the pricing plan based on number of users verses number of workspaces?",
+      "excerpt": "A solo operator wants to use Planable for two projects but says per-workspace pricing is hard to justify for a new project.",
+      "context": "A solo operator wants to use Planable for two projects but says per-workspace pricing is hard to justify for a new project.",
+      "relationship": "explicit Planable evaluator",
+      "relationship_evidence": "The asker says they would use Planable for two projects and refers to the current one-workspace plan.",
+      "source_url": "https://www.g2.com/discussions/27418-can-you-base-the-pricing-plan-based-on-number-of-users-verses-number-of-workspaces",
+      "source_domain": "www.g2.com",
+      "source_platform": "g2",
+      "source_type": "g2_discussion_question",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "created_at": "2020-05-29T11:59:17-05:00",
+      "retrieved_at": "2026-08-28T16:15:58Z"
+    },
+    {
+      "question": "Are there plans for Google My Business Integration?",
+      "excerpt": "The asker wants to schedule and publish Google My Business posts.",
+      "context": "The asker wants to schedule and publish Google My Business posts.",
+      "relationship": "independent Planable feature evaluator",
+      "relationship_evidence": "The product-specific discussion requests a Planable integration but does not state account or subscription status.",
+      "source_url": "https://www.g2.com/discussions/27483-are-there-plans-for-google-my-business-integration",
+      "source_domain": "www.g2.com",
+      "source_platform": "g2",
+      "source_type": "g2_discussion_question",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "created_at": "2020-05-29T11:59:32-05:00",
+      "retrieved_at": "2026-08-28T16:15:58Z"
+    },
+    {
+      "question": "How can we post stories automatically from Planable",
+      "excerpt": "The asker wants Planable to publish Stories automatically instead of requiring a phone.",
+      "context": "The asker wants Planable to publish Stories automatically instead of requiring a phone.",
+      "relationship": "independent Planable workflow evaluator",
+      "relationship_evidence": "The asker describes the desired Planable-to-Story publishing workflow but does not state account or subscription status.",
+      "source_url": "https://www.g2.com/discussions/how-can-we-post-stories-automatically-from-planable",
+      "source_domain": "www.g2.com",
+      "source_platform": "g2",
+      "source_type": "g2_discussion_question",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "created_at": "2022-05-25T04:42:04-05:00",
+      "retrieved_at": "2026-08-28T16:16:06Z"
+    },
+    {
+      "question": "In support of Planable, what do you use for analytics and reporting on your social accounts?",
+      "excerpt": "The asker seeks an analytics and reporting complement to Planable.",
+      "context": "The asker seeks an analytics and reporting complement to Planable.",
+      "relationship": "independent Planable complement evaluator",
+      "relationship_evidence": "The exact question asks what to use alongside Planable but does not state account or subscription status.",
+      "source_url": "https://www.g2.com/discussions/in-support-of-planable-what-do-you-use-for-analytics-and-reporting-on-your-social-accounts",
+      "source_domain": "www.g2.com",
+      "source_platform": "g2",
+      "source_type": "g2_discussion_question",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "created_at": "2022-03-17T19:15:00-05:00",
+      "retrieved_at": "2026-08-28T16:16:02Z"
+    },
+    {
+      "question": "Is there room for Brand ambassadorship?",
+      "excerpt": "The asker offers to train others to use the app and asks about a brand ambassador role.",
+      "context": "The asker offers to train others to use the app and asks about a brand ambassador role.",
+      "relationship": "independent prospective Planable advocate",
+      "relationship_evidence": "The asker discusses training other people on the app but does not state an account or commercial relationship.",
+      "source_url": "https://www.g2.com/discussions/planable-i",
+      "source_domain": "www.g2.com",
+      "source_platform": "g2",
+      "source_type": "g2_discussion_question",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "created_at": "2022-04-28T08:04:18-05:00",
+      "retrieved_at": "2026-08-28T16:16:13Z"
+    },
+    {
+      "question": "When we will have the stories more interactive?",
+      "excerpt": "The asker wants Story support for hashtags and links.",
+      "context": "The asker wants Story support for hashtags and links.",
+      "relationship": "independent Planable feature evaluator",
+      "relationship_evidence": "The product-specific discussion requests additional Instagram Story behavior but does not state account or subscription status.",
+      "source_url": "https://www.g2.com/discussions/when-we-will-have-the-stories-more-interactive",
+      "source_domain": "www.g2.com",
+      "source_platform": "g2",
+      "source_type": "g2_discussion_question",
+      "validation": "fetched-source",
+      "author_available": true,
+      "author_redacted": true,
+      "created_at": "2022-04-28T07:42:28-05:00",
+      "retrieved_at": "2026-08-28T15:56:52Z"
+    }
+  ],
+  "provisional_clusters": [
+    {
+      "label": "Instagram Story publishing and interactivity",
+      "independent_authors": 2,
+      "question_indexes": [
+        2,
+        5
+      ],
+      "limitation": "The two questions join automatic Story publishing and Story interactivity in one workflow theme; their wording and requested capabilities are not identical."
+    }
+  ],
+  "rejection_summary": {
+    "canonical_pages_with_empty_validation_dataset": 3,
+    "fetched_editorial_or_multi_product_prompt_excluded": 1,
+    "discovery_only_leads_excluded": true,
+    "vendor_answers_excluded": true
+  }
+}
