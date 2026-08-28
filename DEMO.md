@@ -15,9 +15,9 @@
 ## Run this — 60 seconds
 
 1. Open Codex at the repository root.
-2. Paste [`demo/seed-prompt.md`](demo/seed-prompt.md).
-3. Watch for [`demo/output/figma-missing-answer.md`](demo/output/figma-missing-answer.md) to show one `BURIED ANSWER` finding backed by two independent questions and Figma's official documentation.
-4. Open the review-only local preview at [`demo/output/figma-missing-answer.html`](demo/output/figma-missing-answer.html). If the run has not finished after 60 seconds, use the two committed fallback artifacts.
+2. Paste the single line in [`demo/seed-prompt.md`](demo/seed-prompt.md): `$missing-answer [https://www.figma.com/](https://www.figma.com/)`.
+3. Watch the skill lead with the `BURIED ANSWER`, the two public questions, the verified answer, and the proposed copy.
+4. The skill then opens an autonomous `Original → Fixed` local preview. If a safe browser preview is unavailable or the run exceeds 60 seconds, open [`demo/output/figma-missing-answer.html`](demo/output/figma-missing-answer.html).
 
 ## Show this — 25 seconds
 
@@ -25,7 +25,7 @@
 
 **Evidence:** The Markdown output preserves both verbatim questions, their public source URLs, the checked customer-facing pages, the official help answer, the 2026-08-28 retrieval date, confidence, and limitations.
 
-**Fallback output:** The exact seed ran from a clean clone of commit `9303c44` with Codex v0.150.1, `gpt-5.6-sol`, and low reasoning. It used only the dated Figma snapshot, produced the committed Markdown finding and HTML preview, made no network requests, and did not modify the live site.
+**Fallback output:** The Markdown finding and `Original → Fixed` HTML are genuine outputs of the same one-line invocation. Both disclose the 2026-08-28 snapshot, and neither changes the live site.
 
 ## Evals — 10 seconds
 

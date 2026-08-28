@@ -80,14 +80,25 @@ Any proposed answer must be supported by official documentation, help-center
 content, product pages, or announcements. Third-party commentary and absence of
 evidence are never converted into product claims.
 
-### 5. Stop at a reviewable draft
+### 5. Finish with a visual review
 
 Missing Answer recommends one small edit but does not publish content, contact
-anyone, or modify the live website. A local HTML preview is a separate optional
-stage entered only when the user explicitly requests it after a positive
-finding. A preview is never treated as evidence.
+anyone, or modify the live website. After a positive finding it autonomously
+shows the original customer-facing section and a temporary `Original → Fixed`
+preview. It uses the rendered page when that is safely available and otherwise
+opens a credential-free local HTML fallback. A preview is never treated as
+evidence or a deployed change.
 
 ## Current demo
+
+```text
+$missing-answer [https://www.figma.com/](https://www.figma.com/)
+```
+
+That URL is the complete user input. The skill recognizes Figma internally,
+uses the verified pack at `demo/input/figma.md`, and owns the output and preview
+paths. The user does not select evidence files, pages, insertion points, or demo
+artifacts.
 
 The official demo uses a dated Figma evidence snapshot. Two independent public
 questions ask whether an external client can comment on a prototype without a
@@ -98,14 +109,10 @@ help documentation says commenters must be signed in and have view access.
 The committed [`BURIED ANSWER`](demo/output/figma-missing-answer.md) finding
 preserves the exact public questions, checked pages, verified official answer,
 confidence, proposed copy, and limitations. The sibling
-[`local preview`](demo/output/figma-missing-answer.html) renders only the
-proposed insertion, identifies itself as a review-only draft, and makes no
+[`local preview`](demo/output/figma-missing-answer.html) is the automatic
+fallback when a safe rendered-page preview is unavailable. It shows
+`Original → Fixed`, identifies itself as a review-only draft, and makes no
 network requests or live-site changes.
-
-The exact seed ran from a clean clone of commit `9303c44` with Codex v0.150.1,
-`gpt-5.6-sol`, and low reasoning. It used only the supplied snapshot, returned
-`BURIED ANSWER`, wrote both fallback artifacts, parsed the HTML successfully,
-and made no live-site change.
 
 The complete presentation contract and observed run provenance are recorded in
 [`DEMO.md`](DEMO.md) and [`demo/evals.md`](demo/evals.md).

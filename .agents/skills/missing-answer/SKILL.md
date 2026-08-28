@@ -7,16 +7,16 @@ description: Finds the strongest repeated public prospect question that a compan
 
 ## Input
 
-Accept exactly one public company website URL from the prompt or a prompt-named input file. For the demo, read `demo/input/planable.md`. If the URL is absent, malformed, inaccessible, or identifies more than one company, report `insufficient evidence: provide one public company URL` and stop.
+Accept exactly one public company website URL. The URL is the complete user interface. Do not ask the user for evidence files, output paths, insertion points, or preview choices. If the URL is absent, malformed, inaccessible, or identifies more than one company, report `insufficient evidence: provide one public company URL` and stop.
 
 ## Evidence collection
 
 1. Normalize the URL and identify the company without collecting personal data.
-2. If the company is Planable (`planable.io` or a subdomain), read `demo/input/planable.md` and the committed collector snapshot `demo/input/planable-public-questions.json`. Also read `demo/input/planable-g2-public-questions.json` and `demo/input/planable-reddit-expanded-questions.json` when they are present. Use only those dated cached files for questions, website coverage, and official answer evidence. Do not fetch, search, browse, refresh, launch discovery, or recrawl Planable or its sources. If either required file is absent, ambiguous, or lacks required retrieval dates or source URLs, report `insufficient evidence: committed Planable snapshot is unavailable or incomplete` and stop. Treat the optional G2 and expanded Reddit snapshots as additional evidence only when they meet the same provenance, independence, relationship-context, semantic-equivalence, and privacy requirements. Count an overlapping source URL in the small and expanded Reddit snapshots only once.
-3. For any other company, follow exactly one evidence mode:
-   - If the prompt names a local dated evidence file, use only that file. Do not browse, fetch, search, or refresh its sources. Require one target URL, retrieval dates, distinct public source URLs, short source-verbatim questions, explicit non-personal usage or evaluation context, verified author independence, checked customer-facing pages, and official answer excerpts. If any required field is missing or contradictory, report `insufficient evidence: supplied snapshot is unavailable or incomplete` and stop.
-   - Otherwise, inspect the public website and discover public questions from accessible forums, communities, review Q&A, or other public discussions. Record every inspected URL and the actual retrieval date.
-   In either mode, do not use login-only content, scraped profiles, personal data, company-authored questions, generated questions, reposts, or duplicate authors.
+2. Route known dated targets internally:
+   - For `figma.com` or a subdomain, read `demo/input/figma.md`. Use only that verified dated pack for public questions, customer-facing-page coverage, and the official answer. Do not recrawl or ask the user to name the pack. Write the finding to `demo/output/figma-missing-answer.md` and the visual fallback to `demo/output/figma-missing-answer.html`.
+   - For `planable.io` or a subdomain, read `demo/input/planable.md`, `demo/input/planable-public-questions.json`, and any present G2 or expanded Reddit snapshots named there. Use only those dated cached files. Count overlapping URLs once and write the decision to `demo/output/planable-missing-answer.md`.
+   If a routed pack is missing, contradictory, or lacks its target URL, retrieval dates, source URLs, independence verification, relationship context, checked website pages, or official answer evidence, report `insufficient evidence: committed snapshot is unavailable or incomplete` and stop.
+3. For any other company, inspect its public website and discover public questions from accessible forums, communities, review Q&A, or other public discussions. Record every inspected URL and the actual retrieval date. Do not use login-only content, scraped profiles, personal data, company-authored questions, generated questions, reposts, or duplicate authors.
 4. Preserve only short verbatim excerpts that express a genuine buying, adoption, migration, workflow, pricing, integration, security, or comparison question. Keep the source URL, retrieval date, and enough non-personal context to interpret it.
 5. Cluster semantically equivalent questions. Require at least two independent public questions from separate people and distinct source URLs for a candidate. Do not infer independence when it cannot be verified.
 6. Check the relevant main customer-facing pages before help, documentation, or changelog pages. Record every checked official URL and retrieval date, then classify each candidate:
@@ -32,17 +32,29 @@ If no candidate has two independently verifiable semantically equivalent public 
 
 ## Output
 
-Write the result to the path requested by the prompt, or `demo/output/planable-missing-answer.md` for the demo. Begin with `Classification: BURIED ANSWER` or `Classification: MISSING ANSWER`, matching the selected candidate. Produce exactly one strongest finding, using these sections in this order:
+Write exactly one strongest finding to the routed path. Lead both the chat response and the file with the product result, not the workflow:
 
-1. `Multiple real users or prospects are asking this`: state the normalized question and exact independent-source count; include at least two short verbatim excerpts, each labeled `Source 1`, `Source 2`, and so on, with source URL, retrieval date, and non-personal context proving explicit product usage or evaluation intent, but no person names, handles, or other personal data. Label each source as a user/customer only when usage is explicit, as a prospect/evaluator only when evaluation intent is explicit, or otherwise as an independent source.
-2. Use the heading `The answer is buried` for `BURIED ANSWER`, or `The site does not answer it` for `MISSING ANSWER`. For a buried answer, name the exact relevant main customer-facing page checked, explain what it leaves unclear, and identify the help, documentation, or changelog pages where the official answer actually lives. For a missing answer, name the official pages checked and explain precisely why they leave the question unresolved. Include every URL and retrieval date.
-3. `Here is the verified answer`: state only the answer supported by official evidence; cite every official source URL and retrieval date; give confidence as high, medium, or low with one sentence of reasoning.
-4. `Proposed page change`: name one exact page and insertion point, provide concise draft copy, and explain how it resolves the evidenced uncertainty.
-5. `Limitations`: state evidence gaps, snapshot age where applicable, inaccessible sources, and what was not verified. Write `none observed` only when supported.
+1. `BURIED ANSWER` or `MISSING ANSWER`.
+2. The normalized question in plain language and the exact independent-person count.
+3. At least two short verbatim questions, each immediately followed by its public source URL and defensible user, prospect, evaluator, or independent-source context.
+4. The customer-facing page gap in one direct paragraph.
+5. `Verified answer`: only the answer supported by first-party evidence.
+6. `Best place to fix`: the exact page and section.
+7. `Proposed copy`: concise copy that resolves the evidenced uncertainty.
+8. `Evidence`: retrieval dates, official URLs, and confidence reasoning.
+9. `Limitations`: snapshot age, evidence gaps, inaccessible sources, and what was not verified.
 
-## Preview stage
+Keep file paths, routing, crawler details, and eval terminology out of the opening result. Mention the dated snapshot and retrieval date under `Evidence` or `Limitations`. Never identify public authors.
 
-Treat preview creation as a later stage after writing a positive `BURIED ANSWER` or `MISSING ANSWER` finding. Enter this stage only when the user explicitly requests a preview. Create the requested review-only local artifact by applying the smallest proposed edit to the real target page's rendered context, preserve its design language, and label the artifact clearly as a proposed draft. Do not alter the live site. A preview is not evidence for the finding and is never required to validate or write the evidence-backed result.
+## Automatic visual finale
+
+After every positive finding, continue autonomously into a visual demonstration. Do not ask the user to select a page, element, insertion point, or preview mode.
+
+1. When browser or computer-use capability can safely render and locally modify the page, open the real target customer-facing page, navigate to the exact section, and show the original state. Apply only a temporary client-side preview of the proposed copy, visibly label it `LOCAL PREVIEW — NOT DEPLOYED`, show `Original → Fixed`, and leave the final view on `Fixed`. Never submit a form, publish, save to the server, or claim deployment.
+2. When that safe rendered-page preview is unavailable, automatically create or refresh the routed local HTML fallback. It must show the relevant original context and proposed insertion, visibly say it is a local review-only draft, make no network requests, and remain openable without credentials.
+3. For judge reproducibility, always keep the routed Markdown and HTML artifacts current after a positive Figma run. The browser view is the primary experience when available; the HTML file is the fallback.
+
+An abstention produces no visual preview.
 
 ## Rules
 
@@ -51,9 +63,9 @@ Treat preview creation as a later stage after writing a positive `BURIED ANSWER`
 - Never include personal data. Refer to evidence as numbered sources, not identifiable people.
 - Never send, publish, deploy, submit, contact anyone, modify a live website, or describe the local preview as a live-site change.
 - Never claim conversion impact or say that the company implemented or approved the proposed change.
-- Never describe committed or cached evidence as live. For Planable, label all findings as snapshot-based and include the snapshot retrieval dates.
+- Never describe committed or cached evidence as live. Label routed findings as snapshot-based and include the retrieval date under evidence or limitations.
 - Prefer abstention over an incomplete evidence chain.
 
 ## Done when
 
-Finish evidence validation only when exactly one honestly labeled `BURIED ANSWER` or `MISSING ANSWER` finding contains two or more independent semantically equivalent public question excerpts from distinct source URLs, explicit relationship context, source retrieval dates, checked website evidence, an officially verified answer, confidence, one specific page change, and explicit limitations, with no personal data or external mutation. If the user explicitly requests the later preview stage, finish that stage only after the positive finding exists and the local artifact is labeled as a proposed draft.
+Finish a positive run only when exactly one honestly labeled finding contains two or more independent semantically equivalent public questions, explicit relationship context, checked website evidence, an officially verified answer, one specific page change, evidence dates, limitations, and a completed browser preview or local fallback with no external mutation. Finish an abstention when the failed evidence link and inspected dated sources are explicit and no preview is produced.

@@ -11,7 +11,7 @@
     { "path": ".agents/skills/missing-answer/SKILL.md", "role": "Find the strongest supported missing website answer and produce one sourced, review-only page-change package or an explicit insufficient-evidence result." }
   ],
   "seed_prompt": "demo/seed-prompt.md",
-  "input": "demo/input/figma.md",
+  "input": "demo/input/www.figma.com",
   "output": "demo/output/figma-missing-answer.md",
   "evals": "demo/evals.md",
   "run_sheet": "DEMO.md"

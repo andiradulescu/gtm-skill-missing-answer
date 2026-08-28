@@ -68,10 +68,8 @@ access to comment. This snapshot does not establish what onboarding screens a
 new commenter sees, which plan-specific invitation flows apply, or whether Figma
 will add anonymous commenting later.
 
-## Requested artifact
+## Demonstration target
 
-Write one finding to `demo/output/figma-missing-answer.md` and a local sibling
-preview to `demo/output/figma-missing-answer.html`. The proposed
-change should target the client-feedback section of
-<https://www.figma.com/agencies/>. Mark the preview as a review-only local draft.
-Do not modify the live site.
+The supported page change belongs in the client-feedback section of
+<https://www.figma.com/agencies/>. Any visual demonstration must remain a local
+review-only preview and must not modify the live site.

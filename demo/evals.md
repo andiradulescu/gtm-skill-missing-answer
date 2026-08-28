@@ -14,18 +14,23 @@ retrieval or mutation.
 
 ### Input
 
-The canonical input is [`demo/input/figma.md`](input/figma.md). Its request is:
+The canonical user invocation is:
 
 ```text
-Write one finding to demo/output/figma-missing-answer.md. The proposed change
-should target the client-feedback section of https://www.figma.com/agencies/.
-Mark the preview as a review-only local draft. Do not modify the live site.
+$missing-answer [https://www.figma.com/](https://www.figma.com/)
 ```
+
+The skill routes that URL internally to the dated Figma evidence pack.
 
 Its material evidence is:
 
-- Two independent public questions ask whether clients can comment on a Figma
-  prototype without a Figma account.
+- Source 1 asks: “Wait, what? Clients have to create an account to leave
+  comments? Non logged in users cannot provide feedback without registering?
+  Is this still the case?”
+  <https://forum.figma.com/suggest-a-feature-11/guest-comments-voting-for-clients-w-o-account-19333>
+- Source 2 asks: “Do you know if clients can comment on a prototype without a
+  Figma account?”
+  <https://www.reddit.com/r/FigmaDesign/comments/yqw5x5/how_do_i_share_a_prototype_with_a_client_that/>
 - Figma's agency page says, “Invite clients into Figma to collaborate and
   comment on the work,” without stating the account or sign-in requirement.
 - Figma's official help snapshot says, “You can comment if you're signed in to
@@ -55,8 +60,9 @@ Added: Clients can comment on shared prototypes when they are signed in to Figma
 ```
 
 The result marks its evidence as a dated snapshot, states its limitations, and
-states that no Figma workspace or live page was modified. The HTML sibling is a
-demo convenience; it is not evidence needed to validate this finding.
+states that no Figma workspace or live page was modified. The automatic visual
+stage shows `Original → Fixed`; its HTML fallback is a demo convenience, not
+evidence needed to validate the finding.
 
 ### Why it passes
 
