@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
   "team": {
-    "name": "TODO team name",
-    "members": ["TODO member 1"]
+    "name": "Andrei Radulescu",
+    "members": ["Andrei Radulescu"]
   },
   "track": "ai-search-optimization",
-  "problem": "TODO one sentence: who has what GTM problem and what the skill produces",
+  "problem": "A B2B SaaS content lead cannot reliably identify which repeated public buying or adoption question the company website fails to answer; Missing Answer produces one review-only website-change package backed by independent public questions and an answer verified from official sources.",
   "entry_skill": ".agents/skills/TODO-skill-name/SKILL.md",
   "skills": [
     { "path": ".agents/skills/TODO-skill-name/SKILL.md", "role": "TODO the one job this skill owns" }
