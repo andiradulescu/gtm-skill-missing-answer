@@ -6,6 +6,11 @@ import path from 'node:path';
 const GOOGLE_ACTOR = 'apify~google-search-scraper';
 const REDDIT_ACTOR = 'trudax~reddit-scraper-lite';
 const QUESTION_START = /^(?:who|what|when|where|why|how|can|could|does|do|is|are|should|would|which)\b/i;
+const DEFAULT_MAX_SOURCE_URLS = 100;
+const DEFAULT_MAX_PAGES_PER_QUERY = 3;
+const RESULTS_PER_PAGE = 100;
+const MAX_SOURCE_URLS_LIMIT = 200;
+const MAX_PAGES_PER_QUERY_LIMIT = 10;
 
 function actorEndpoint(actor) {
   return `https://api.apify.com/v2/actors/${actor}/run-sync-get-dataset-items?timeout=120&maxTotalChargeUsd=1.00&clean=true`;
@@ -13,7 +18,15 @@ function actorEndpoint(actor) {
 
 function parseArguments(argv) {
   const options = {};
-  const names = { '--company': 'company', '--domain': 'domain', '--output': 'output', '--raw-fixture': 'rawFixture', '--queries': 'queries' };
+  const names = {
+    '--company': 'company',
+    '--domain': 'domain',
+    '--output': 'output',
+    '--raw-fixture': 'rawFixture',
+    '--queries': 'queries',
+    '--max-source-urls': 'maxSourceUrls',
+    '--max-pages-per-query': 'maxPagesPerQuery',
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     const name = names[argument];
@@ -30,7 +43,17 @@ function parseArguments(argv) {
   try { domain = new URL(`https://${options.domain}`).hostname.toLowerCase().replace(/\.$/, ''); }
   catch { throw new Error('--domain must be a valid hostname'); }
   if (domain !== options.domain.toLowerCase().replace(/\.$/, '') || !domain.includes('.')) throw new Error('--domain must be a bare hostname');
-  return { ...options, company: options.company.trim(), domain };
+  const maxSourceUrls = boundedInteger(options.maxSourceUrls, '--max-source-urls', DEFAULT_MAX_SOURCE_URLS, 1, MAX_SOURCE_URLS_LIMIT);
+  const maxPagesPerQuery = boundedInteger(options.maxPagesPerQuery, '--max-pages-per-query', DEFAULT_MAX_PAGES_PER_QUERY, 1, MAX_PAGES_PER_QUERY_LIMIT);
+  return { ...options, company: options.company.trim(), domain, maxSourceUrls, maxPagesPerQuery };
+}
+
+function boundedInteger(raw, name, fallback, minimum, maximum) {
+  if (raw === undefined) return fallback;
+  if (!/^\d+$/.test(raw)) throw new Error(`${name} must be an integer between ${minimum} and ${maximum}`);
+  const value = Number.parseInt(raw, 10);
+  if (value < minimum || value > maximum) throw new Error(`${name} must be an integer between ${minimum} and ${maximum}`);
+  return value;
 }
 
 function boundedQueries(company, domain, supplied) {
@@ -125,20 +148,31 @@ function sanitize(value) {
     .replace(/(^|[\s(])(?:\/u\/|u\/)[A-Z0-9_-]+/gi, '$1[redacted-author]');
 }
 
-function canonicalRedditUrl(rawUrl) {
+function parsedRedditUrl(rawUrl) {
   let url;
   try { url = new URL(rawUrl); } catch { return null; }
   const hostname = url.hostname.toLowerCase().replace(/\.$/, '');
   if (url.protocol !== 'https:' || !['reddit.com', 'www.reddit.com'].includes(hostname)) return null;
-  if (!/^\/r\/[^/]+\/comments\/[^/]+(?:\/[^/]*)?\/?$/i.test(url.pathname)) return null;
   url.hostname = 'www.reddit.com';
   url.search = '';
   url.hash = '';
   url.pathname = `${url.pathname.replace(/\/+$/, '')}/`;
+  return url;
+}
+
+function canonicalRedditPostUrl(rawUrl) {
+  const url = parsedRedditUrl(rawUrl);
+  if (!url || !/^\/r\/[^/]+\/comments\/[^/]+\/[^/]+\/?$/i.test(url.pathname)) return null;
   return url.href;
 }
 
-function discoverRedditUrls(discovery) {
+function canonicalRedditCommentUrl(rawUrl) {
+  const url = parsedRedditUrl(rawUrl);
+  if (!url || !/^\/r\/[^/]+\/comments\/[^/]+\/[^/]+\/[^/]+\/?$/i.test(url.pathname)) return null;
+  return url.href;
+}
+
+function discoverRedditUrls(discovery, maxSourceUrls = DEFAULT_MAX_SOURCE_URLS) {
   const candidates = [];
   const queries = [];
   for (const resultPage of discovery) {
@@ -147,29 +181,33 @@ function discoverRedditUrls(discovery) {
     if (resultPage.organicResults !== undefined && !Array.isArray(resultPage.organicResults)) throw new Error('organicResults must be an array');
     if (resultPage.peopleAlsoAsk !== undefined && !Array.isArray(resultPage.peopleAlsoAsk)) throw new Error('peopleAlsoAsk must be an array');
     for (const result of resultPage.organicResults ?? []) {
-      const sourceUrl = canonicalRedditUrl(textField(result, ['url', 'link']));
+      const sourceUrl = canonicalRedditPostUrl(textField(result, ['url', 'link']));
       if (sourceUrl && !candidates.some((candidate) => candidate.source_url === sourceUrl)) {
         candidates.push({ source_url: sourceUrl, source_platform: 'reddit', discovery_query: query });
       }
-      if (candidates.length === 10) return { candidates, queries };
+      if (candidates.length === maxSourceUrls) return { candidates, queries };
     }
   }
   return { candidates, queries };
 }
 
-async function collectLive(queries) {
+async function collectLive(queries, { maxSourceUrls, maxPagesPerQuery }) {
   const token = await loadToken();
-  const discovery = await runActor(GOOGLE_ACTOR, token, { queries: queries.join('\n'), maxPagesPerQuery: 1, resultsPerPage: 10 });
-  const { candidates } = discoverRedditUrls(discovery);
+  const discovery = await runActor(GOOGLE_ACTOR, token, {
+    queries: queries.join('\n'),
+    maxPagesPerQuery,
+    resultsPerPage: RESULTS_PER_PAGE,
+  });
+  const { candidates } = discoverRedditUrls(discovery, maxSourceUrls);
   if (candidates.length === 0) return { discovery, reddit: [] };
   const reddit = await runActor(REDDIT_ACTOR, token, {
     startUrls: candidates.map(({ source_url }) => ({ url: source_url })),
-    skipComments: true,
+    skipComments: false,
     includeMediaLinks: false,
     includeNSFW: false,
-    maxItems: 10,
-    maxPostCount: 10,
-    maxComments: 0,
+    maxItems: maxSourceUrls * 10,
+    maxPostCount: maxSourceUrls,
+    maxComments: maxSourceUrls * 9,
   });
   return { discovery, reddit };
 }
@@ -186,51 +224,98 @@ function explicitQuestion(title, body) {
   return '';
 }
 
-function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }) {
+function literalCommentQuestion(body) {
+  const clean = body.replace(/\s+/g, ' ').trim();
+  const match = clean.match(/(?:^|[.!]\s+)((?:who|what|when|where|why|how|can|could|does|do|is|are|should|would|which)\b[^?]{0,279}\?)/i);
+  return match?.[1] ?? '';
+}
+
+function mentionsSubject(value, company, domain) {
+  const names = [company, domain, domain.split('.')[0]].map((item) => item.trim()).filter(Boolean);
+  return names.some((name) => new RegExp(`(^|[^a-z0-9])${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`, 'i').test(value));
+}
+
+function hasSubjectRelationship(value, company, domain) {
+  if (!mentionsSubject(value, company, domain)) return false;
+  return /\b(?:evaluat\w*|using|used|use|customer\w*|client\w*|workflow\w*|alternative\w*|switch\w*|trial\w*|pricing|price\w*|feature\w*|support\w*|account\w*|approv\w*|schedul\w*|manag\w*|need\w*|looking|who|what|when|where|why|how|can|could|does|do|is|are|should|would|which)\b/i.test(value);
+}
+
+function isRemoved(item, ...values) {
+  if (item.isDeleted === true || item.isRemoved === true || item.deleted === true || item.removed === true) return true;
+  return values.some((value) => /^\[(?:deleted|removed)\]$/i.test(value.trim()));
+}
+
+function verifiedAuthor(item) {
+  const author = textField(item, ['username']);
+  return /^\[(?:deleted|removed)\]$/i.test(author) ? '' : author;
+}
+
+function normalize({ discovery, reddit }, { company, domain, mode, liveQueries, maxSourceUrls, maxPagesPerQuery }) {
   const retrievedAt = new Date().toISOString();
-  const { candidates, queries: fixtureQueries } = discoverRedditUrls(discovery);
+  const { candidates, queries: fixtureQueries } = discoverRedditUrls(discovery, maxSourceUrls);
   const candidateByUrl = new Map(candidates.map((candidate) => [candidate.source_url, candidate]));
+  const fetchedParents = new Map();
+  for (const item of reddit) {
+    if (textField(item, ['dataType']).toLowerCase() !== 'post') continue;
+    const sourceUrl = canonicalRedditPostUrl(textField(item, ['url']));
+    const id = textField(item, ['id']);
+    const title = textField(item, ['title']);
+    const body = textField(item, ['body']);
+    if (!id || !candidateByUrl.has(sourceUrl) || isRemoved(item, title, body)) continue;
+    fetchedParents.set(id, { sourceUrl, title, body, candidate: candidateByUrl.get(sourceUrl) });
+  }
   const seen = new Set();
   const rawAuthors = new Set();
   const seenAuthors = new Set();
   let duplicateAuthorPostsExcluded = 0;
   let unverifiableAuthorPostsExcluded = 0;
+  let duplicateAuthorQuestionsExcluded = 0;
+  let unverifiableAuthorQuestionsExcluded = 0;
   const questions = [];
   for (const post of reddit) {
-    if (textField(post, ['dataType', 'type']).toLowerCase() !== 'post') continue;
-    const sourceUrl = canonicalRedditUrl(textField(post, ['canonicalUrl', 'url', 'postUrl', 'link']));
-    const candidate = candidateByUrl.get(sourceUrl);
-    if (!candidate || post.isDeleted === true || post.isRemoved === true || post.deleted === true || post.removed === true) continue;
+    const dataType = textField(post, ['dataType']).toLowerCase();
+    if (!['post', 'comment'].includes(dataType)) continue;
+    const isComment = dataType === 'comment';
+    const sourceUrl = isComment
+      ? canonicalRedditCommentUrl(textField(post, ['url']))
+      : canonicalRedditPostUrl(textField(post, ['url']));
+    const parent = isComment ? fetchedParents.get(textField(post, ['postId'])) : null;
+    const candidate = isComment ? parent?.candidate : candidateByUrl.get(sourceUrl);
+    if (!sourceUrl || !candidate) continue;
     const title = textField(post, ['title']);
-    const body = textField(post, ['body', 'text', 'selftext']);
-    if (/^\[(?:deleted|removed)\]$/i.test(title) || /^\[(?:deleted|removed)\]$/i.test(body)) continue;
-    const question = explicitQuestion(title, body);
+    const body = textField(post, ['body']);
+    if (isRemoved(post, title, body)) continue;
+    const question = isComment ? literalCommentQuestion(body) : explicitQuestion(title, body);
+    if (isComment && !hasSubjectRelationship(body, company, domain) && !hasSubjectRelationship(`${parent.title} ${parent.body}`, company, domain)) continue;
     const key = question.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
     if (!question || seen.has(key)) continue;
-    const rawAuthor = textField(post, ['username', 'userId', 'author', 'authorName']);
+    const rawAuthor = verifiedAuthor(post);
     if (!rawAuthor) {
-      unverifiableAuthorPostsExcluded += 1;
+      unverifiableAuthorQuestionsExcluded += 1;
+      if (!isComment) unverifiableAuthorPostsExcluded += 1;
       continue;
     }
     if (rawAuthor && seenAuthors.has(rawAuthor)) {
-      duplicateAuthorPostsExcluded += 1;
+      duplicateAuthorQuestionsExcluded += 1;
+      if (!isComment) duplicateAuthorPostsExcluded += 1;
       continue;
     }
     seen.add(key);
     if (rawAuthor) seenAuthors.add(rawAuthor);
     if (rawAuthor) rawAuthors.add(rawAuthor);
-    const excerpt = sanitize(body.replace(/\s+/g, ' ').trim())
+    const sanitizedBody = sanitize(body.replace(/\s+/g, ' ').trim())
       .replace(/\s+submitted by\s+\[redacted-author\].*$/i, '')
-      .trim()
-      .slice(0, 280);
+      .trim();
+    const excerpt = (isComment ? sanitize(question) : sanitizedBody).slice(0, 280);
+    const parentContext = parent ? sanitize(`${parent.title} ${parent.body}`.replace(/\s+/g, ' ').trim()).slice(0, 280) : '';
     questions.push({
       question: sanitize(question),
       excerpt,
-      context: excerpt,
+      context: isComment && !hasSubjectRelationship(body, company, domain) ? parentContext : excerpt,
       source_url: sourceUrl,
       source_domain: 'www.reddit.com',
       source_platform: 'reddit',
-      source_type: 'reddit_post',
+      source_type: isComment ? 'reddit_comment' : 'reddit_post',
       discovery_query: candidate.discovery_query,
       validation: 'fetched-source',
       author_available: Boolean(rawAuthor),
@@ -246,8 +331,8 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
     retrieved_at: retrievedAt,
     collection_mode: mode,
     actors: {
-      discovery: { id: GOOGLE_ACTOR, endpoint: actorEndpoint(GOOGLE_ACTOR), max_pages_per_query: 1, results_per_page: 10 },
-      validation: { id: REDDIT_ACTOR, endpoint: actorEndpoint(REDDIT_ACTOR), max_source_urls: 10, comments: false },
+      discovery: { id: GOOGLE_ACTOR, endpoint: actorEndpoint(GOOGLE_ACTOR), max_pages_per_query: maxPagesPerQuery, results_per_page: RESULTS_PER_PAGE },
+      validation: { id: REDDIT_ACTOR, endpoint: actorEndpoint(REDDIT_ACTOR), max_source_urls: maxSourceUrls, comments: true },
     },
     queries: mode === 'live-apify' ? liveQueries : fixtureQueries,
     discovery_summary: { canonical_reddit_urls_found: candidates.length },
@@ -256,6 +341,9 @@ function normalize({ discovery, reddit }, { company, domain, mode, liveQueries }
       accepted_posts_with_author: rawAuthors.size,
       duplicate_author_posts_excluded: duplicateAuthorPostsExcluded,
       unverifiable_author_posts_excluded: unverifiableAuthorPostsExcluded,
+      accepted_questions_with_author: rawAuthors.size,
+      duplicate_author_questions_excluded: duplicateAuthorQuestionsExcluded,
+      unverifiable_author_questions_excluded: unverifiableAuthorQuestionsExcluded,
     },
     questions,
   };
@@ -277,7 +365,7 @@ async function main() {
   const options = parseArguments(process.argv.slice(2));
   const queries = boundedQueries(options.company, options.domain, options.queries);
   const mode = options.rawFixture ? 'fixture' : 'live-apify';
-  const raw = options.rawFixture ? await readFixture(options.rawFixture) : await collectLive(queries);
+  const raw = options.rawFixture ? await readFixture(options.rawFixture) : await collectLive(queries, options);
   await writeJsonAtomically(options.output, normalize(raw, { ...options, mode, liveQueries: queries }));
 }
 

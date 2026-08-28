@@ -181,6 +181,7 @@ test('expands bounded discovery and retains only fetched qualifying Reddit comme
       reddit: [
         {
           dataType: 'post',
+          id: 't3_post0',
           url: parentUrl,
           title: 'Planable workflow discussion',
           body: 'We are evaluating Planable for client review at our agency.',
@@ -189,34 +190,50 @@ test('expands bounded discovery and retains only fetched qualifying Reddit comme
         },
         {
           dataType: 'comment',
+          postId: 't3_post0',
           url: `${parentUrl}comment1/`,
-          postUrl: parentUrl,
           body: 'Does it let clients approve without an account?',
           username: 'comment_author',
           createdAt: '2026-08-20T11:00:00.000Z',
         },
         {
           dataType: 'comment',
+          postId: 't3_post0',
           url: `${parentUrl}comment2/`,
-          postUrl: parentUrl,
           body: 'I wonder whether approvals need an account.',
           username: 'not_an_interrogative',
         },
         {
           dataType: 'comment',
+          postId: 't3_post0',
           url: `${parentUrl}comment3/`,
-          postUrl: parentUrl,
           body: '[removed]',
           username: 'removed_author',
         },
         {
           dataType: 'comment',
+          postId: 't3_post0',
           url: `${parentUrl}comment4/`,
-          postUrl: parentUrl,
           body: 'Does it support this workflow?',
         },
         {
           dataType: 'post',
+          id: 't3_post2',
+          url: discoveredPosts[2].url,
+          title: 'Planable won an award',
+          body: 'A brief award announcement.',
+          username: 'announcement_author',
+        },
+        {
+          dataType: 'comment',
+          postId: 't3_post2',
+          url: `${discoveredPosts[2].url}comment5/`,
+          body: 'Does it support this workflow?',
+          username: 'unrelated_context_author',
+        },
+        {
+          dataType: 'post',
+          id: 't3_post1',
           url: duplicateAuthorPostUrl,
           title: 'Can Planable handle agency approvals?',
           body: 'I am evaluating the product.',
@@ -229,7 +246,7 @@ test('expands bounded discovery and retains only fetched qualifying Reddit comme
 
   assert.equal(result.status, 0, result.stderr);
   const collected = JSON.parse(await readFile(output, 'utf8'));
-  assert.equal(collected.discovery_summary.canonical_reddit_urls_found, 105);
+  assert.equal(collected.discovery_summary.canonical_reddit_urls_found, 100);
   assert.ok(collected.actors.discovery.max_pages_per_query > 1);
   assert.ok(collected.actors.discovery.results_per_page >= 100);
   assert.ok(collected.actors.validation.max_source_urls >= 100);
@@ -240,9 +257,10 @@ test('expands bounded discovery and retains only fetched qualifying Reddit comme
   assert.equal(collected.questions[0].source_type, 'reddit_comment');
   assert.equal(collected.questions[0].source_url, `${parentUrl}comment1/`);
   assert.equal(collected.questions[0].excerpt, 'Does it let clients approve without an account?');
-  assert.equal(collected.questions[0].context, 'We are evaluating Planable for client review at our agency.');
+  assert.equal(collected.questions[0].context, 'Planable workflow discussion We are evaluating Planable for client review at our agency.');
   assert.equal(collected.questions[0].created_at, '2026-08-20T11:00:00.000Z');
   assert.equal(collected.questions[0].validation, 'fetched-source');
+  assert.equal(collected.independence_check.accepted_posts_with_author, 1);
   assert.equal(collected.independence_check.accepted_questions_with_author, 1);
   assert.equal(collected.independence_check.duplicate_author_questions_excluded, 1);
   assert.equal(collected.independence_check.unverifiable_author_questions_excluded, 1);
